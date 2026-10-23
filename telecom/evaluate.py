@@ -139,7 +139,7 @@ def evaluate_offline():
             results.append(result)
     report = {"mode": "offline", "run_at": datetime.now(ZoneInfo("Africa/Cairo")).isoformat(),
               "scope": "Real SQL, sklearn inference, FAISS retrieval, LangGraph and REST; rule-based routing and extractive answers. One real missing-artifact fault injection; no mocked model outputs or Gemini calls.",
-              "provider_calls": 0, "case_set_version": 3, "case_kinds": dict(Counter(case["kind"] for case in cases)),
+              "provider_calls": 0, "case_set_version": 4, "case_kinds": dict(Counter(case["kind"] for case in cases)),
               "passed": sum(result["passed"] for result in results), "total": len(results), "cases": results}
     (ROOT / "reports").mkdir(exist_ok=True)
     (ROOT / "reports/evaluation.json").write_text(json.dumps(report, indent=2), encoding="utf-8")

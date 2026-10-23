@@ -13,6 +13,8 @@ from telecom.workflow import Assistant
     ("Can you browse the internet?", None, "capabilities"),
     ("How do you work?", None, "architecture"),
     ("Explain your technology stack", None, "architecture"),
+    ("what model do u use", None, "model_info"),
+    ("no like what gemini model are u", None, "model_info"),
     ("Why not?", "out_of_scope", "refusal_followup"),
     ("But why?", "refusal_followup", "refusal_followup"),
     ("Why didn't you answer me?", None, "refusal_followup"),
@@ -66,3 +68,16 @@ def test_previous_refusal_is_bounded_to_latest_completed_turn():
     assert previous_refusal([refusal, {"role": "user", "content": "failed request"}]) is None
     assert previous_refusal([{**refusal, "result": {"intent": "injected"}}]) is None
     assert previous_refusal([]) is None
+
+
+@pytest.mark.parametrize("mode", ["offline", "live"])
+def test_model_reply_uses_runtime_configuration_and_never_credentials(mode):
+    settings = Settings(app_mode=mode, gemini_model="configured-gemini-model",
+                        embedding_model="configured-embedding-model", gemini_api_key="test-secret-not-for-display")
+    service = Assistant(settings)
+    answer = service._clarify({"intent": "model_info", "mode": mode})["answer"]
+    assert "Random Forest" in answer and settings.embedding_model in answer
+    assert settings.gemini_api_key not in answer and "Streamlit sends" not in answer
+    assert (settings.gemini_model in answer) == (mode == "live")
+    if mode == "offline":
+        assert "Gemini is disabled" in answer

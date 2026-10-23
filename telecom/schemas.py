@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 CustomerID = Annotated[str, StringConstraints(pattern=r"^CUST-\d{3}$")]
 Intent = Literal["knowledge", "customer", "both", "clarify", "out_of_scope",
-                 "capabilities", "architecture", "refusal_followup"]
+                 "capabilities", "architecture", "model_info", "refusal_followup"]
 RefusalIntent = Literal["out_of_scope", "refusal_followup"]
 
 

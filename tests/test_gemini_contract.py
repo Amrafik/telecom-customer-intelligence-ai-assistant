@@ -246,6 +246,8 @@ def test_no_evidence_skips_gemini_generation():
     ("Write a cake recipe", None, "out_of_scope", "outside"),
     ("What can you do?", None, "capabilities", "can't browse"),
     ("How do you work?", None, "architecture", "LangGraph"),
+    ("what model do u use", None, "model_info", "gemini-3.5-flash-lite"),
+    ("no like what gemini model are u", None, "model_info", "gemini-3.5-flash-lite"),
     ("Why not?", "out_of_scope", "refusal_followup", "focused on telecom"),
     ("Why not?", "refusal_followup", "refusal_followup", "focused on telecom"),
     ("Hello", None, "clarify", "What would you like"),

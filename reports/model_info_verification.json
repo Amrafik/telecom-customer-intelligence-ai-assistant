@@ -1,0 +1,61 @@
+{
+  "run_at": "2026-10-23T13:06:25.141142+00:00",
+  "scope": "Model-info intent correction; no architecture redesign.",
+  "windows_pytest": {
+    "tests": 181,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "report": "reports/model_info_regression.xml",
+    "console_seconds": 48.56,
+    "upstream_warnings": 4
+  },
+  "linux_cloud_conversation": {
+    "tests": 42,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "report": "reports/model_info_linux.xml",
+    "console_seconds": 10.7,
+    "upstream_warnings": 7,
+    "environment": "Ubuntu WSL, not Community Cloud"
+  },
+  "offline_evaluation": {
+    "passed": 38,
+    "total": 38,
+    "provider_calls": 0,
+    "case_set_version": 4
+  },
+  "live_gemini": {
+    "passed": 3,
+    "total": 3,
+    "generate_content_calls": 3,
+    "model_availability_requests": 1,
+    "report": "reports/gemini_model_info_smoke.json"
+  },
+  "initial_regression": {
+    "passed": 177,
+    "failed": 4,
+    "cause": "Offline rule initially omitted informal u; corrected before final rerun."
+  },
+  "dependencies": "Windows and Linux pip check: No broken requirements found.",
+  "mocked_sdk_cases_included_in_full_suite": 31,
+  "preservation": {
+    "original_artifact_hashes_unchanged": 9,
+    "tool_cloud_guards_unchanged": true,
+    "cloud_offline_only": true,
+    "credentials_untouched": true
+  },
+  "runtime": {
+    "backend_health": 200,
+    "streamlit_health": 200,
+    "current_model_info_schema": true,
+    "mode": "live"
+  },
+  "checks": {
+    "staged_tracked_files_scanned": 100,
+    "secret_matches": 0,
+    "documentation_links_checked": 60
+  },
+  "limitations": "Small live smoke set; deterministic phrase rules remain limited. Reports configured model identifiers, not inferred identity. Prior mixed-agent live evidence remains historical. Upstream deprecation warnings remain."
+}

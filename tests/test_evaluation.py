@@ -15,7 +15,7 @@ def test_offline_evaluation_case(case, assistant, client):
 
 
 def test_case_catalogue_covers_all_faq_topics():
-    assert len(CASES) == len({case["id"] for case in CASES}) == 36
+    assert len(CASES) == len({case["id"] for case in CASES}) == 38
     documents = json.loads((ROOT / "data/faqs.json").read_text(encoding="utf-8"))
     covered = {case["expected"] for case in CASES if case["kind"] == "retrieval"}
     assert covered == {f"faq:{document['id']}:" for document in documents}

@@ -1,9 +1,9 @@
 {
   "mode": "offline",
-  "run_at": "2026-10-23T15:50:01.597363+03:00",
+  "run_at": "2026-10-23T16:03:37.785669+03:00",
   "scope": "Real SQL, sklearn inference, FAISS retrieval, LangGraph and REST; rule-based routing and extractive answers. One real missing-artifact fault injection; no mocked model outputs or Gemini calls.",
   "provider_calls": 0,
-  "case_set_version": 3,
+  "case_set_version": 4,
   "case_kinds": {
     "retrieval": 8,
     "retrieval_miss": 1,
@@ -21,11 +21,11 @@
     "tool_budget": 1,
     "wrong_id": 1,
     "wrong_tool": 1,
-    "chat": 9,
+    "chat": 11,
     "missing_model": 1
   },
-  "passed": 36,
-  "total": 36,
+  "passed": 38,
+  "total": 38,
   "cases": [
     {
       "id": "retrieval_roaming",
@@ -40,7 +40,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 6493.607
+      "latency_ms": 8969.62
     },
     {
       "id": "retrieval_billing",
@@ -59,7 +59,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 8.395
+      "latency_ms": 7.735
     },
     {
       "id": "retrieval_cancellation",
@@ -74,7 +74,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 8.188
+      "latency_ms": 6.643
     },
     {
       "id": "retrieval_plans",
@@ -91,7 +91,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 8.544
+      "latency_ms": 6.778
     },
     {
       "id": "retrieval_no_evidence",
@@ -101,7 +101,7 @@
       },
       "kind": "retrieval_miss",
       "mode": "offline",
-      "latency_ms": 6.582
+      "latency_ms": 6.385
     },
     {
       "id": "route_knowledge",
@@ -125,7 +125,7 @@
       },
       "kind": "route",
       "mode": "offline",
-      "latency_ms": 14.097
+      "latency_ms": 16.642
     },
     {
       "id": "route_customer",
@@ -155,7 +155,7 @@
       },
       "kind": "route",
       "mode": "offline",
-      "latency_ms": 201.046
+      "latency_ms": 250.781
     },
     {
       "id": "route_both",
@@ -188,7 +188,7 @@
       },
       "kind": "route",
       "mode": "offline",
-      "latency_ms": 26.112
+      "latency_ms": 26.456
     },
     {
       "id": "route_clarify",
@@ -206,7 +206,7 @@
       },
       "kind": "route",
       "mode": "offline",
-      "latency_ms": 2.174
+      "latency_ms": 2.348
     },
     {
       "id": "sql_join_lookup",
@@ -227,7 +227,7 @@
       },
       "kind": "lookup",
       "mode": "offline",
-      "latency_ms": 0.948
+      "latency_ms": 0.877
     },
     {
       "id": "unknown_customer",
@@ -238,7 +238,7 @@
       },
       "kind": "unknown_customer",
       "mode": "offline",
-      "latency_ms": 3.907
+      "latency_ms": 3.576
     },
     {
       "id": "prediction_repeatability",
@@ -253,7 +253,7 @@
       },
       "kind": "prediction",
       "mode": "offline",
-      "latency_ms": 29.05
+      "latency_ms": 26.41
     },
     {
       "id": "combined_graph",
@@ -286,7 +286,7 @@
       },
       "kind": "combined",
       "mode": "offline",
-      "latency_ms": 27.929
+      "latency_ms": 25.686
     },
     {
       "id": "missing_id_clarification",
@@ -304,7 +304,7 @@
       },
       "kind": "clarification",
       "mode": "offline",
-      "latency_ms": 1.474
+      "latency_ms": 1.41
     },
     {
       "id": "conflicting_id_clarification",
@@ -322,7 +322,7 @@
       },
       "kind": "conflicting_ids",
       "mode": "offline",
-      "latency_ms": 1.196
+      "latency_ms": 1.166
     },
     {
       "id": "empty_message_rejected",
@@ -332,7 +332,7 @@
       },
       "kind": "bad_request",
       "mode": "offline",
-      "latency_ms": 1.642
+      "latency_ms": 1.807
     },
     {
       "id": "sql_injection_rejected",
@@ -342,7 +342,7 @@
       },
       "kind": "bad_predict",
       "mode": "offline",
-      "latency_ms": 1.17
+      "latency_ms": 1.246
     },
     {
       "id": "prediction_requires_lookup",
@@ -361,7 +361,7 @@
       },
       "kind": "lookup_required",
       "mode": "offline",
-      "latency_ms": 0.842
+      "latency_ms": 0.974
     },
     {
       "id": "duplicate_call_blocked",
@@ -386,7 +386,7 @@
       },
       "kind": "duplicate_call",
       "mode": "offline",
-      "latency_ms": 0.673
+      "latency_ms": 0.78
     },
     {
       "id": "tool_budget_enforced",
@@ -411,7 +411,7 @@
       },
       "kind": "tool_budget",
       "mode": "offline",
-      "latency_ms": 0.613
+      "latency_ms": 0.739
     },
     {
       "id": "tool_id_bound_to_user",
@@ -430,7 +430,7 @@
       },
       "kind": "wrong_id",
       "mode": "offline",
-      "latency_ms": 0.056
+      "latency_ms": 0.072
     },
     {
       "id": "agent_tool_allowlist",
@@ -455,7 +455,7 @@
       },
       "kind": "wrong_tool",
       "mode": "offline",
-      "latency_ms": 0.08
+      "latency_ms": 0.104
     },
     {
       "id": "retrieval_payment",
@@ -474,7 +474,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 7.121
+      "latency_ms": 7.811
     },
     {
       "id": "retrieval_support",
@@ -489,7 +489,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 7.701
+      "latency_ms": 7.88
     },
     {
       "id": "retrieval_data_alerts",
@@ -506,7 +506,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 7.811
+      "latency_ms": 7.897
     },
     {
       "id": "retrieval_plan_change",
@@ -525,7 +525,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 8.021
+      "latency_ms": 7.76
     },
     {
       "id": "profile_lookup_only",
@@ -550,7 +550,43 @@
       },
       "kind": "chat",
       "mode": "offline",
-      "latency_ms": 3.368
+      "latency_ms": 3.6
+    },
+    {
+      "id": "scope_model",
+      "passed": true,
+      "detail": {
+        "route": "clarify",
+        "intent": "model_info",
+        "tools": [],
+        "tool_statuses": [],
+        "error_codes": [],
+        "source_ids": [],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true
+        }
+      },
+      "kind": "chat",
+      "mode": "offline",
+      "latency_ms": 1.192
+    },
+    {
+      "id": "scope_gemini_model",
+      "passed": true,
+      "detail": {
+        "route": "clarify",
+        "intent": "model_info",
+        "tools": [],
+        "tool_statuses": [],
+        "error_codes": [],
+        "source_ids": [],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true
+        }
+      },
+      "kind": "chat",
+      "mode": "offline",
+      "latency_ms": 1.084
     },
     {
       "id": "combined_profile_plan",
@@ -580,7 +616,7 @@
       },
       "kind": "chat",
       "mode": "offline",
-      "latency_ms": 14.328
+      "latency_ms": 12.371
     },
     {
       "id": "combined_missing_customer_policy",
@@ -608,7 +644,7 @@
       },
       "kind": "chat",
       "mode": "offline",
-      "latency_ms": 10.691
+      "latency_ms": 12.053
     },
     {
       "id": "missing_model_partial_result",
@@ -641,7 +677,7 @@
       },
       "kind": "missing_model",
       "mode": "offline",
-      "latency_ms": 19.17
+      "latency_ms": 22.222
     },
     {
       "id": "scope_unrelated",
@@ -659,7 +695,7 @@
       },
       "kind": "chat",
       "mode": "offline",
-      "latency_ms": 1.373
+      "latency_ms": 1.433
     },
     {
       "id": "scope_capabilities",
@@ -677,7 +713,7 @@
       },
       "kind": "chat",
       "mode": "offline",
-      "latency_ms": 0.981
+      "latency_ms": 1.192
     },
     {
       "id": "scope_architecture",
@@ -695,7 +731,7 @@
       },
       "kind": "chat",
       "mode": "offline",
-      "latency_ms": 0.881
+      "latency_ms": 1.091
     },
     {
       "id": "scope_refusal_followup",
@@ -713,7 +749,7 @@
       },
       "kind": "chat",
       "mode": "offline",
-      "latency_ms": 0.93
+      "latency_ms": 1.084
     },
     {
       "id": "scope_greeting",
@@ -731,7 +767,7 @@
       },
       "kind": "chat",
       "mode": "offline",
-      "latency_ms": 0.968
+      "latency_ms": 1.053
     },
     {
       "id": "scope_recovery_customer",
@@ -756,7 +792,7 @@
       },
       "kind": "chat",
       "mode": "offline",
-      "latency_ms": 2.579
+      "latency_ms": 2.924
     }
   ]
 }

@@ -1,0 +1,127 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "mode": "live",
+  "run_at": "2026-10-23T16:04:26.841404+03:00",
+  "model_availability": {
+    "model": "models/gemini-3.5-flash-lite",
+    "supported_actions": [
+      "generateContent",
+      "countTokens",
+      "createCachedContent",
+      "batchGenerateContent"
+    ]
+  },
+  "passed": 3,
+  "total": 3,
+  "cases": [
+    {
+      "id": "scope_architecture",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "expected_intent": true,
+        "bounded_truthful_response": true,
+        "no_fabricated_sources": true,
+        "one_actual_classification": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true
+      },
+      "http_status": 200,
+      "latency_ms": 10519.916,
+      "request": {
+        "message": "How do you work?"
+      },
+      "generate_content_calls": 1,
+      "response": {
+        "answer": "Streamlit sends your question to FastAPI. LangGraph coordinates SQLite customer lookup, a saved Scikit-learn Random Forest for churn, and Sentence Transformers with FAISS for FAQ retrieval. In this local live session, Gemini classifies intent, selects validated tools and generates grounded FAQ answers.",
+        "route": "clarify",
+        "intent": "architecture",
+        "mode": "live",
+        "sources": [],
+        "tool_trace": [],
+        "errors": [],
+        "request_id": "42668b52-ef95-4587-99d8-d41e25f773ff",
+        "latency_ms": 10517.326
+      },
+      "executed_tools": []
+    },
+    {
+      "id": "scope_model",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "expected_intent": true,
+        "bounded_truthful_response": true,
+        "no_fabricated_sources": true,
+        "one_actual_classification": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true
+      },
+      "http_status": 200,
+      "latency_ms": 1132.402,
+      "request": {
+        "message": "what model do u use"
+      },
+      "generate_content_calls": 1,
+      "response": {
+        "answer": "This local session is configured to use Gemini `gemini-3.5-flash-lite`. Churn prediction uses a Scikit-learn Random Forest; FAQ embeddings use `sentence-transformers/all-MiniLM-L6-v2`.",
+        "route": "clarify",
+        "intent": "model_info",
+        "mode": "live",
+        "sources": [],
+        "tool_trace": [],
+        "errors": [],
+        "request_id": "f0b2d8f8-6867-4ec0-9f2d-68e61db0b466",
+        "latency_ms": 1130.304
+      },
+      "executed_tools": []
+    },
+    {
+      "id": "scope_gemini_model",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "expected_intent": true,
+        "bounded_truthful_response": true,
+        "no_fabricated_sources": true,
+        "one_actual_classification": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true
+      },
+      "http_status": 200,
+      "latency_ms": 1016.601,
+      "request": {
+        "message": "no like what gemini model are u"
+      },
+      "generate_content_calls": 1,
+      "response": {
+        "answer": "This local session is configured to use Gemini `gemini-3.5-flash-lite`. Churn prediction uses a Scikit-learn Random Forest; FAQ embeddings use `sentence-transformers/all-MiniLM-L6-v2`.",
+        "route": "clarify",
+        "intent": "model_info",
+        "mode": "live",
+        "sources": [],
+        "tool_trace": [],
+        "errors": [],
+        "request_id": "45b42fef-d144-4a6a-a1e9-6dbe387a1e29",
+        "latency_ms": 1014.442
+      },
+      "executed_tools": []
+    }
+  ],
+  "generate_content_calls": 3,
+  "scope": "Actual Gemini requests, unchanged LangGraph, FastAPI and registry; evidence compared to executed FAISS search, SQLite JOIN and sklearn inference.",
+  "limitations": "Small smoke set; source identity and selected policy facts are checked, but this is not an exhaustive semantic entailment or security evaluation. Free-tier access and quotas are account-specific."
+}

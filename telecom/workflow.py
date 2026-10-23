@@ -183,9 +183,10 @@ class Assistant:
             state["context"].errors.append(exc.code)
             return {"knowledge_answer": str(exc), "knowledge_sources": []}
 
-    @staticmethod
-    def _clarify(state):
-        return {"answer": state.get("clarification") or scope_reply(state["intent"], state["mode"])}
+    def _clarify(self, state):
+        return {"answer": state.get("clarification") or scope_reply(
+            state["intent"], state["mode"], gemini_model=self.settings.gemini_model,
+            embedding_model=self.settings.embedding_model)}
 
     @staticmethod
     def _combine(state):

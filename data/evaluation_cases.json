@@ -201,6 +201,26 @@
     "expected_customer_id": "CUST-002"
   },
   {
+    "id": "scope_model",
+    "kind": "chat",
+    "question": "what model do u use",
+    "expected": "clarify",
+    "expected_intent": "model_info",
+    "answer_contains": "Gemini is disabled",
+    "expected_tools": [],
+    "expected_source_types": []
+  },
+  {
+    "id": "scope_gemini_model",
+    "kind": "chat",
+    "question": "no like what gemini model are u",
+    "expected": "clarify",
+    "expected_intent": "model_info",
+    "answer_contains": "Random Forest",
+    "expected_tools": [],
+    "expected_source_types": []
+  },
+  {
     "id": "combined_profile_plan",
     "kind": "chat",
     "question": "Show CUST-002 profile and explain when a mobile plan change takes effect.",

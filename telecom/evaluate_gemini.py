@@ -27,9 +27,12 @@ CASES = [
     ("scope_followup", "Why not?", "clarify", [], None),
     ("scope_capabilities", "What can you do?", "clarify", [], None),
     ("scope_architecture", "How do you work?", "clarify", [], None),
+    ("scope_model", "what model do u use", "clarify", [], None),
+    ("scope_gemini_model", "no like what gemini model are u", "clarify", [], None),
 ]
 SCOPE_INTENTS = {"scope_unrelated": "out_of_scope", "scope_followup": "refusal_followup",
-                 "scope_capabilities": "capabilities", "scope_architecture": "architecture"}
+                 "scope_capabilities": "capabilities", "scope_architecture": "architecture",
+                 "scope_model": "model_info", "scope_gemini_model": "model_info"}
 
 
 def evidence_checks(body: dict, executed: list[dict], assistant: Assistant, case_id: str, faq_id: str | None) -> dict:
@@ -117,7 +120,9 @@ def evaluate_gemini(settings: Settings | None = None, *, spacing_seconds: float 
                     if case_id in SCOPE_INTENTS:
                         intent = SCOPE_INTENTS[case_id]
                         checks.update(expected_intent=body["intent"] == intent,
-                                      bounded_truthful_response=body["answer"] == scope_reply(intent, "live"),
+                                      bounded_truthful_response=body["answer"] == scope_reply(
+                                          intent, "live", gemini_model=settings.gemini_model,
+                                          embedding_model=settings.embedding_model),
                                       no_fabricated_sources=not body["sources"],
                                       one_actual_classification=len(generation_calls) - calls_before == 1)
                         if case_id == "scope_followup":

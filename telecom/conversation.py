@@ -10,6 +10,8 @@ REACTION = r"\b(why|why not|how come|refus\w*|won.t|wouldn.t|can.t|cannot|didn.t
 
 def offline_route(message: str, previous_intent: RefusalIntent | None = None) -> str:
     """Rules are deliberately limited; they do not emulate Gemini understanding."""
+    if re.search(r"\b(what|which)\b.*\b(model|models|llm)\b.*\b(you|u|your|assistant)\b|\b(your|this assistant.s)\s+(?:gemini\s+|embedding\s+|churn\s+)?model\b", message, re.I):
+        return "model_info"
     if re.search(r"\b(how (do|does) (you|this|the assistant|it) work|architecture|under the hood|tech(?:nology)? stack)\b", message, re.I):
         return "architecture"
     if re.search(r"\b(what can you (do|help)|your capabilities|what (is|are) (this assistant|your (purpose|tools))|who are you|can you (browse|access the internet))\b", message, re.I):
@@ -25,7 +27,13 @@ def offline_route(message: str, previous_intent: RefusalIntent | None = None) ->
     return "out_of_scope"
 
 
-def scope_reply(intent: str, mode: str) -> str:
+def scope_reply(intent: str, mode: str, *, gemini_model: str | None = None,
+                embedding_model: str | None = None) -> str:
+    if intent == "model_info":
+        llm = (f"This local session is configured to use Gemini `{gemini_model}`."
+               if mode == "live" else "Gemini is disabled in this offline session; no Gemini API calls are made.")
+        answer = f"{llm} Churn prediction uses a Scikit-learn Random Forest; FAQ embeddings use `{embedding_model or 'not configured'}`."
+        return answer if mode == "live" else "Offline mode (deterministic rules): " + answer
     replies = {
         "out_of_scope": "That falls outside this telecom assistant's scope. I can help with telecom policies, demo customer profiles and churn estimates.",
         "capabilities": "I can explain the demo telecom FAQs, look up a fictional customer's profile and estimate churn risk. I can't browse the web, access real accounts or make account changes.",

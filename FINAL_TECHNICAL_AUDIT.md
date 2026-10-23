@@ -6,7 +6,7 @@
 
 **Current deployment status:** the [public Streamlit demo](https://amrafik-telecom-ai.streamlit.app/) uses deterministic offline routing with actual SQLite lookups, Scikit-learn churn predictions, FAISS retrieval and LangGraph execution. It makes **no Gemini API calls**. The full local application supports Gemini-powered routing, function calling and grounded generation, with recorded live verification. The internal hosted FastAPI backend is not a separately public REST API.
 
-**Latest verification:** intent handling passed **173 Windows tests**, **36 offline cases**, **38 repeated Linux cloud/conversation tests** and **5 live Gemini scenarios**. See [current regression](reports/intent_regression.xml) and [live evidence](reports/gemini_intent_smoke.json). Earlier 143/123-test runs and their live reports remain historical evidence. The requirement table retains the original functional audit evidence with deployment status updated below; the final follow-up describes the new intent behavior.
+**Latest verification:** the model-information correction passed **181 Windows tests**, **38 offline cases**, **42 repeated Linux cloud/conversation tests** and **3 live Gemini scenarios**. See [current verification](reports/model_info_verification.json) and [live evidence](reports/gemini_model_info_smoke.json). Earlier intent-handling, 143/123-test runs and their live reports remain historical evidence. The requirement table retains the original functional audit evidence with deployment status updated below; the final follow-ups describe the intent behavior.
 
 ## Requirement assessment
 
@@ -52,7 +52,7 @@ These are real public-data results, not synthetic training results or a claim of
 |---|---|---|
 | Dependency compatibility | `No broken requirements found.` SDK being removed is absent from the environment. | `reports/final_command_checks.json`, audited lock file |
 | Complete pytest suite | **88 passed, 0 failures/errors/skips; 32.15 seconds; 4 upstream deprecation warnings** | `reports/final_regression_summary.json` (original snapshot; JUnit has since been updated) |
-| Offline evaluation | **22/22 passed**; real local components, deterministic decisions/excerpts, no Gemini calls | `reports/final_regression_summary.json` (original snapshot; current case report contains 36) |
+| Offline evaluation | **22/22 passed**; real local components, deterministic decisions/excerpts, no Gemini calls | `reports/final_regression_summary.json` (original snapshot; current case report contains 38) |
 | Fresh limited live Gemini | **2/2 passed** on `gemini-3.5-flash-lite` | `reports/gemini_live_audit.json` |
 | Restarted servers / UI smoke | **8/8 checks passed**: health, Gemini metadata, prediction, customer 404, bad-input 422, no-tool clarification, Streamlit HTTP and render | `reports/final_runtime_smoke.json` |
 | Model/index/data preservation | All 9 pre-audit artifact hashes unchanged; 100 fitted trees; model classes `[0,1]`; 11 FAISS vectors / 384 dimensions | `reports/pre_audit_artifact_hashes.json`, `final_artifact_verification.json` |
@@ -139,3 +139,9 @@ No app deployment was performed during that preparation run. The owner subsequen
 - Evidence: [Windows JUnit](reports/intent_regression.xml), [Linux JUnit](reports/intent_linux_pytest.xml), [offline cases](reports/evaluation.json) and [real Gemini smoke](reports/gemini_intent_smoke.json). Earlier reports remain historical. The model, training data, benchmarks, SQLite schema, retrieval resources and cloud credential guards were not redesigned.
 
 The [consolidated verification](reports/intent_verification.json) also records passing dependency checks on Windows/Linux, unchanged hashes for all nine original data/model/index/benchmark artifacts, unchanged tool/cloud guards and staged-file secret scanning. Limitations remain: deterministic keyword rules have narrow coverage, Gemini may misclassify untested phrasing, and a refusal hint supplies no memory of the prior topic or customer. The hosted path remains strictly offline; this pass does not enable Gemini hosting or establish production capacity.
+
+## Model-information correction — 23 October 2026
+
+Interactive use showed that “How do you work?”, “what model do u use” and “no like what gemini model are u” all received the architecture overview. Added the validated `model_info` intent, mapped to the existing clarification node, with model identifiers read from runtime settings. The live reply names the configured Gemini model; the offline reply says Gemini is disabled. Both identify the Random Forest and configured embedding model, without receiving or displaying credentials.
+
+Final verification passed **181 Windows tests**, **38 offline cases**, **42 Linux cloud/conversation tests** and **3/3 real Gemini screenshot questions**. The live check used three classification calls plus one model-availability lookup, no tools and no automatic retries. Model metadata is reported as configuration, not inferred model identity. The initial offline regression caught four failures caused by missing support for “u”; that rule was corrected before the passing rerun. [Verification and preservation checks](reports/model_info_verification.json) preserve the exact outcomes. Existing tool/cloud safeguards and all nine original artifact hashes remain unchanged; the hosted demo stays offline-only.

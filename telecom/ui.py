@@ -48,7 +48,7 @@ def show_result(result):
     route_names = {"knowledge": "Knowledge Agent", "customer": "Customer Intelligence Agent",
                    "both": "Both agents", "clarify": "Clarification"}
     intent_names = {"capabilities": "Capabilities", "architecture": "How it works",
-                    "out_of_scope": "Scope guidance", "refusal_followup": "Scope explanation"}
+                    "model_info": "Models", "out_of_scope": "Scope guidance", "refusal_followup": "Scope explanation"}
     label = intent_names.get(result.get("intent"), route_names[result["route"]])
     st.caption(f"{label} · {result['mode']} · {result['latency_ms'] / 1000:.2f}s")
     if result["sources"]:
