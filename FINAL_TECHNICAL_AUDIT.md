@@ -118,3 +118,11 @@ Interactive use exposed a false clarification for `Show the profile for CUST-002
 - README and the project guide now distinguish benchmark, offline, mocked and live evidence; explain the extended cases and temporary-artifact test; and document the current sidebar labels. The removed portfolio footer remains absent.
 
 The consolidated evidence is [reports/portfolio_verification.json](reports/portfolio_verification.json). A securely restricted free public live demo is not verified: this API lacks authentication and shared usage controls, and the two-process app needs hosting validation. No deployment was made. The [demo assessment](docs/DEMO_OPTIONS.md) recommends a short recording of local interactions.
+
+## Offline cloud preparation follow-up
+
+A separate Streamlit Community Cloud entry point has been prepared locally, with a loopback FastAPI server, checksum-verified copy of the existing trained model, automatic isolated SQLite/FAISS cache initialization, and shared concurrency/minute/day guards. The local API now imports the same handlers from `api_factory.py`, avoiding local `.env` initialization in cloud imports. Default local launch behavior and the original UI, settings, workflow, tools, dependencies and artifacts are preserved.
+
+Fresh evidence: **143/143 full Windows tests**, **20/20 repeated cloud tests on Ubuntu Linux**, **30/30 offline cases**, **10/10 actual Linux cold-start/restart smoke checks**, and passing dependency checks on both systems. All cloud work is offline; zero Gemini calls were made. See [cloud preparation evidence](reports/cloud_preparation.json). The Linux cold-start peak was **681.5 MiB RSS**, so Community Cloud memory headroom remains unverified.
+
+This is **prepared configuration, not a deployed cloud service**. Privacy controls, invitations and actual platform capacity remain unverified. The offline wrapper cannot be switched to live mode using `.env`, environment variables or cloud secrets. The preparation was subsequently authorized for GitHub publication; no app deployment was performed. Exact steps and the access-control distinction are in [the deployment guide](docs/STREAMLIT_CLOUD.md).

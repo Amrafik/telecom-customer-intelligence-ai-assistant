@@ -2,9 +2,6 @@ import json
 
 import pytest
 
-from telecom.config import ROOT
-
-
 def test_health_checks_actual_local_dependencies(client):
     response = client.get("/health")
     assert response.status_code == 200
@@ -43,10 +40,10 @@ def test_prediction_rejects_sql_injection(client):
     assert client.post("/predict", json={"customer_id": "CUST-001' OR 1=1 --"}).status_code == 422
 
 
-def test_logs_contain_timestamps_latency_selections_and_failures(client):
+def test_logs_contain_timestamps_latency_selections_and_failures(client, isolated_logs):
     response = client.post("/chat", json={"message": "Predict churn for CUST-999"})
     request_id = response.headers["X-Request-ID"]
-    rows = [json.loads(line) for line in (ROOT / "logs/app.jsonl").read_text().splitlines()]
+    rows = [json.loads(line) for line in (isolated_logs / "logs/app.jsonl").read_text(encoding="utf-8").splitlines()]
     correlated = [row for row in rows if row["request_id"] == request_id]
     assert {row["event"] for row in correlated} >= {"agent_selection", "tool_execution", "chat_completed", "http_request"}
     assert all("timestamp" in row for row in correlated)

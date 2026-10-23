@@ -1,0 +1,9 @@
+{
+  "sha256": "77bbe69c031e89563a1110e226f5daa44e2fe854c1cfd40b26bf82c7d82f4782",
+  "model_version": "uci563-rf-seed42-90d5fb6b",
+  "dataset_sha256": "90d5fb6bd1630cd4de4b4d28fcf8b4cb92a8f6ab7484605b0799d47386f7dbe1",
+  "sklearn": "1.7.2",
+  "benchmark_sha256": "422067cbe89bcf3b665c6b06deb7559b95dcb5dd17a41be3162eee82e1c6bcdf",
+  "benchmark_hash_format": "File bytes with CRLF normalized to LF for cross-platform Git checkouts.",
+  "origin": "Byte-for-byte copy of the existing locally trained public-data pipeline. No retraining."
+}

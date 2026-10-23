@@ -1,0 +1,138 @@
+{
+  "run_at": "2026-10-23T14:11:51.379449+03:00",
+  "status": "Verified offline private-cloud configuration prepared for authorized publication on main; hosted deployment not performed.",
+  "mode": "offline only",
+  "gemini_calls": 0,
+  "windows_full_regression": {
+    "tests": 143,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 44.743,
+    "timestamp": "2026-10-23T14:08:14.453306+03:00",
+    "report": "reports/cloud_regression.xml"
+  },
+  "windows_cloud_subset": {
+    "passed": 20,
+    "included_in_full_suite": true,
+    "report": "reports/cloud_regression.xml"
+  },
+  "linux_cloud_tests": {
+    "tests": 20,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 11.683,
+    "timestamp": "2026-10-23T14:10:17.885945+03:00",
+    "report": "reports/cloud_linux_pytest.xml"
+  },
+  "offline_evaluation": {
+    "mode": "offline",
+    "run_at": "2026-10-23T14:11:09.501108+03:00",
+    "passed": 30,
+    "total": 30,
+    "provider_calls": 0
+  },
+  "linux_cold_start_smoke": {
+    "environment": "Ubuntu WSL / Python 3.12.3; not Community Cloud Debian",
+    "torch": "2.5.1+cpu",
+    "cuda_available": false,
+    "checks": {
+      "offline_and_key_empty": true,
+      "ready": true,
+      "lookup": true,
+      "saved_pipeline_prediction": true,
+      "mixed_graph": true,
+      "source_types": true,
+      "invalid_customer": true,
+      "unauthorized": true,
+      "server_restart_reuses_resources": true,
+      "filesystem_restart_reuses_index": true
+    },
+    "passed": 10,
+    "total": 10,
+    "cold_start_and_checks_seconds": 19.025,
+    "first_runtime_peak_rss_mib": 681.5,
+    "memory_scope": "API thread, Streamlit imports, model/index initialization and offline requests; not a full hosted container limit test.",
+    "gemini_calls": 0,
+    "model_bootstrap": "Real pinned Hugging Face download and FAISS build in a fresh temporary cache."
+  },
+  "dependencies": {
+    "windows_pip_check": "No broken requirements found.",
+    "linux_pip_check": "No broken requirements found.",
+    "linux_torch": "2.5.1+cpu",
+    "nvidia_packages": 0,
+    "linux_install_report": "reports/cloud_linux_dependencies.json"
+  },
+  "security_and_preservation": {
+    "current_git_candidates_scanned": 88,
+    "credential_findings": 0,
+    "env_untracked": true,
+    "cloud_secret_files_ignored": true,
+    "example_has_no_credentials": true,
+    "original_local_ui_config_workflow_tools_requirements_unchanged": true,
+    "original_artifacts_unchanged": 9,
+    "packaged_model_matches_original": true,
+    "secrets_example_valid": true,
+    "documentation_local_links_checked": 35,
+    "scope": "Exact current tracked/staged blobs, including the packaged binary; actual local credential values and common key patterns. Not a full historical secret audit.",
+    "staged_files": 26,
+    "current_tracked_and_staged_blobs_scanned": 88,
+    "expected_parent_sha": "e774f677bccf1b9d73e247ede9d1533f35d78257",
+    "necessary_binary": {
+      "path": "deploy/streamlit/artifacts/churn_pipeline.joblib",
+      "bytes": 1561741,
+      "purpose": "Existing trained pipeline needed for offline startup; verified against manifest."
+    },
+    "unnecessary_large_files": 0,
+    "local_gemini_source_unchanged": true
+  },
+  "model_artifact": {
+    "sha256": "77bbe69c031e89563a1110e226f5daa44e2fe854c1cfd40b26bf82c7d82f4782",
+    "model_version": "uci563-rf-seed42-90d5fb6b",
+    "dataset_sha256": "90d5fb6bd1630cd4de4b4d28fcf8b4cb92a8f6ab7484605b0799d47386f7dbe1",
+    "sklearn": "1.7.2",
+    "benchmark_sha256": "422067cbe89bcf3b665c6b06deb7559b95dcb5dd17a41be3162eee82e1c6bcdf",
+    "benchmark_hash_format": "File bytes with CRLF normalized to LF for cross-platform Git checkouts.",
+    "origin": "Byte-for-byte copy of the existing locally trained public-data pipeline. No retraining."
+  },
+  "limits": {
+    "concurrent_business_requests": 1,
+    "business_requests_per_rolling_minute": 6,
+    "business_requests_per_utc_day": 100,
+    "health_authenticated_but_exempt": true,
+    "failed_admitted_requests_count": true,
+    "daily_count_survives_backend_restart": true,
+    "ephemeral_filesystem_loss_resets_counters": true
+  },
+  "limitations": [
+    "No Community Cloud deployment, privacy setting, invite flow or platform resource allocation has been tested.",
+    "Linux tests used Ubuntu WSL, not the managed Debian image.",
+    "681.5 MiB Linux cold-start peak may exceed the lowest published memory allocation; hosted memory remains a trial gate.",
+    "Live Gemini is deliberately unsupported by this cloud entry point; no paid quota or billing status was inspected.",
+    "Private viewing requires platform sharing configuration. The loopback token is internal authentication, not viewer authentication.",
+    "Full Windows suite includes the 20 cloud tests; separate Linux execution is a repeat of that subset, not 20 new scenarios.",
+    "Four upstream warnings on Windows and seven on Linux were non-failing."
+  ],
+  "actions_not_performed": [
+    "deploy",
+    "enable live Gemini",
+    "change billing",
+    "modify local .env"
+  ],
+  "cross_platform_benchmark_fingerprint": "Verified with LF and CRLF file bytes on Windows and Linux; original benchmark preserved.",
+  "publication_verification": {
+    "target_branch": "main",
+    "initial_regression": {
+      "passed": 142,
+      "failed": 1,
+      "cause": "Logging test parsed a malformed line in the shared development log; concurrent check processes also wrote to that file."
+    },
+    "fix": "Pytest log handlers isolated per test in temporary directories. Runtime logging unchanged. Final checks run sequentially.",
+    "gemini_calls": 0,
+    "cloud_mode": "offline only",
+    "deployment_performed": false,
+    "billing_changed": false,
+    "expected_parent_sha": "e774f677bccf1b9d73e247ede9d1533f35d78257"
+  }
+}

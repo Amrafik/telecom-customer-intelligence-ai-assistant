@@ -1,3 +1,4 @@
+import logging
 import socket
 
 import pytest
@@ -6,6 +7,24 @@ from fastapi.testclient import TestClient
 from telecom.api import create_app
 from telecom.config import Settings
 from telecom.workflow import Assistant
+
+
+@pytest.fixture(autouse=True)
+def isolated_logs(tmp_path, monkeypatch):
+    from telecom import monitoring
+    logger = logging.getLogger("telecom.events")
+    previous = list(logger.handlers)
+    for handler in previous:
+        logger.removeHandler(handler)
+    monkeypatch.setattr(monitoring, "ROOT", tmp_path)
+    try:
+        yield tmp_path
+    finally:
+        for handler in list(logger.handlers):
+            logger.removeHandler(handler)
+            handler.close()
+        for handler in previous:
+            logger.addHandler(handler)
 
 
 @pytest.fixture(autouse=True)

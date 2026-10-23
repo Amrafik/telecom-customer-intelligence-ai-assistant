@@ -93,7 +93,7 @@ Source files, FAQ/seed data and reports belong in a portfolio repository. Large/
 | `gemini_llm.py` | SDK transport, one-call validation and `native_history()` preservation. |
 | `tools.py` | Schemas, `ToolContext`, `tool_spec()`, `ToolExecutor.execute()`: execution boundary and per-request safeguards. |
 | `workflow.py` | `State`, `Assistant`, graph nodes and conditional edges; resource caching and response construction. |
-| `api.py` | `create_app()`: four routes, middleware, safe errors and readiness checks. |
+| `api_factory.py`, `api.py` | `create_app()` defines four routes, middleware, safe errors and readiness. `api.py` constructs the local Uvicorn app; the cloud wrapper imports the factory without loading local configuration. |
 | `ui.py` | Streamlit chat, optional customer selector, HTTP requests and evidence rendering. |
 | `monitoring.py`, `monitor.py` | Correlated JSON events and observed request-latency summaries. |
 | `evaluate.py` | `check_chat()`, `check_case()`, `evaluate_offline()`: 30 deterministic regression cases; observed tool executions are checked against returned evidence. `--live` explicitly calls Gemini verification. |
@@ -423,7 +423,7 @@ Only fictional app data is sent to Gemini. Raw question/tool payloads are omitte
 
 ### 9.1 FastAPI responsibilities
 
-`create_app()` in `api.py` constructs the application and shares an `Assistant` service. Route functions are small because business logic lives in the lower-level modules.
+`create_app()` in `api_factory.py` constructs the application and shares an `Assistant` service. Route functions are small because business logic lives in the lower-level modules.
 
 | Route | Flow |
 |---|---|
@@ -477,7 +477,7 @@ The executed command was:
 .\.venv\Scripts\python.exe -m pytest -q --junitxml=reports/pytest.xml
 ```
 
-The final regression result is **123 passed in 36.47 seconds**, with four upstream deprecation warnings and no failed or skipped tests. The JUnit evidence is `reports/pytest.xml`. Of these tests, **23** are explicitly marked `mocked_llm`: they simulate Google SDK responses to test the provider contract. They are a subset of 123, not an additional run or proof of live Gemini behavior. Other tests exercise local components and deliberately inject some failures.
+The portfolio-publication regression result was **123 passed in 36.47 seconds**, with four upstream deprecation warnings and no failed or skipped tests. The JUnit evidence is `reports/pytest.xml`. Of these tests, **23** are explicitly marked `mocked_llm`: they simulate Google SDK responses to test the provider contract. They were a subset of 123, not an additional run or proof of live Gemini behavior. Other tests exercise local components and deliberately inject some failures.
 
 The 30 catalogue cases run both through the standalone evaluation command and as parameterized pytest checks. Those are two executions of the same cases, not 60 distinct scenarios. The catalogue test also checks unique IDs and coverage of all eight FAQ topics. A separate test rejects unknown evaluation kinds.
 
@@ -601,3 +601,19 @@ The [demo assessment](docs/DEMO_OPTIONS.md) recommends a short local recording. 
 A public offline version could avoid Gemini usage, but hosting both processes and rebuilding the local artifacts would still need testing. A restricted live deployment would need access controls and shared usage limits first. Neither has been deployed or verified here. The scope remains a manageable local graduate project.
 
 The four README screenshots were supplied by the project owner from the working application and saved unchanged. Their source and workflow panels are closed. They illustrate the interface and visible answers; the machine-readable reports and regression tests provide separate execution evidence. No recording has been created as part of this pass.
+
+## 17. The optional offline cloud wrapper
+
+`deploy/streamlit/app.py` is separate from the original local UI. It sets CPU thread limits before importing the numerical stack and asks `cloud_runtime.get_runtime()` for one process-wide backend. Streamlit also caches that object across reruns. `CloudRuntime.ensure_started()` serializes startup, binds a random loopback port, starts Uvicorn in a background thread and waits for a real `/health` response. Repeated startup calls reuse the server; restarting a stopped server reuses the loaded assistant. The cloud backend uses the same API handlers in `api_factory.py`.
+
+`cloud_resources.offline_settings()` supplies every setting explicitly and disables `.env` loading. It forces offline mode and an empty credential even when the developer's environment requests live mode. `load_trusted_model()` checks the packaged artifact's SHA-256, sklearn version and benchmark fingerprint before loading Joblib, then checks its model/dataset identity. The packaged binary is a copy of the already trained model, not a new fit. A matching checksum establishes consistency with the reviewed manifest, not independent trust in a maliciously replaced repository.
+
+`prepare_assistant()` creates a separate cloud database and vector cache under `.cache/cloud`. Missing resources are rebuilt from fictional seeds, FAQ text and the pinned public embedding model. The builder returns its embedder so the retriever can reuse it. Subsequent requests share the loaded model/index; a complete process restart must load them again. Existing local artifacts and benchmark files are not rewritten.
+
+`UsageLimiter` uses a lock to admit one business request at a time, a rolling in-memory window for six requests per minute, and a SQLite transaction for one hundred requests per UTC day. Failed admitted requests count too. Health checks are exempt but still require the internal server token. The token travels only in the server-side HTTP client; Community Cloud's private sharing setting authenticates viewers. Neither the token nor the limiter makes an unrestricted public live Gemini service safe. Daily counts survive ordinary backend restarts, but can disappear with ephemeral storage.
+
+This cloud path is intentionally offline-only and has no Gemini charges. It demonstrates the real graph, SQL JOIN, trained classifier, retrieval and REST boundary with deterministic decisions/excerpts. The original local live app remains the place to demonstrate Gemini routing and generation. Consult [the deployment guide](docs/STREAMLIT_CLOUD.md) for exact steps and current verification limits.
+
+Cloud preparation then expanded the complete Windows suite to **143 passing tests** in **44.80 seconds**, including twenty cloud-specific tests. All twenty also passed on Ubuntu WSL / Python 3.12.3, and a separate real Linux cold-start smoke passed ten checks with a fresh embedding download and FAISS build. These repeated executions are not additional distinct scenarios. `reports/cloud_preparation.json` links the exact evidence. The Linux smoke peaked at 681.5 MiB RSS, leaving uncertain headroom at Community Cloud's lowest published allocation; a hosted trial remains necessary. No Gemini calls or deployment occurred.
+
+The publication rerun also isolated pytest logs from the development log and other processes. The autouse `isolated_logs` fixture redirects only the monitoring module's root during a test, closes its temporary handlers afterward and restores previous handlers. The logging test still parses every generated line and checks request IDs, choices and failures. This prevents unrelated historical log content from deciding whether a fresh test passes, without adding production multi-process logging.

@@ -1,0 +1,24 @@
+{
+  "environment": "Ubuntu WSL / Python 3.12.3; not Community Cloud Debian",
+  "torch": "2.5.1+cpu",
+  "cuda_available": false,
+  "checks": {
+    "offline_and_key_empty": true,
+    "ready": true,
+    "lookup": true,
+    "saved_pipeline_prediction": true,
+    "mixed_graph": true,
+    "source_types": true,
+    "invalid_customer": true,
+    "unauthorized": true,
+    "server_restart_reuses_resources": true,
+    "filesystem_restart_reuses_index": true
+  },
+  "passed": 10,
+  "total": 10,
+  "cold_start_and_checks_seconds": 19.025,
+  "first_runtime_peak_rss_mib": 681.5,
+  "memory_scope": "API thread, Streamlit imports, model/index initialization and offline requests; not a full hosted container limit test.",
+  "gemini_calls": 0,
+  "model_bootstrap": "Real pinned Hugging Face download and FAISS build in a fresh temporary cache."
+}

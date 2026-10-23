@@ -2,6 +2,8 @@
 
 Assessment date: 23 October 2026. No deployment, billing change or API-key change was performed.
 
+An offline-only private Community Cloud wrapper is now provided; see [the deployment guide](STREAMLIT_CLOUD.md). It has not been deployed. This does not enable the invite-only **live** option assessed below.
+
 ## Recommendation
 
 Use a two- to three-minute recording of the local application, supported by the real screenshots in the README and reproducible setup commands. The current code does not provide the access and global usage controls needed for a safely restricted, unattended live public demo. A recording lets a recruiter see Gemini tool selection and the returned evidence without exposing a public endpoint or consuming quota for every viewer.

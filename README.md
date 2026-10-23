@@ -234,9 +234,9 @@ Recorded checks on **23 October 2026**:
 
 | Check | Result | Scope and evidence |
 |---|---:|---|
-| Automated suite | **123 passed** | Local regression and simulated-provider integration, including the 30 evaluation cases. [JUnit report](reports/pytest.xml). |
+| Automated suite | **143 passed** | Local regression, simulated-provider integration and cloud wrapper tests, including the 30 evaluation cases. [Current JUnit report](reports/cloud_regression.xml); earlier 123-test report is preserved. |
 | Offline evaluation | **30 / 30** | Real SQL, inference, vector retrieval and rule-based orchestration; zero Gemini calls. [Case report](reports/evaluation.json). |
-| Mocked Gemini SDK contracts | **23 / 23**, included in the 123 | Simulated HTTP responses exercise the official SDK and real local tools; they do not prove live decisions. [Verification summary](reports/portfolio_verification.json). |
+| Mocked Gemini SDK contracts | **23 / 23**, included in the 143 | Simulated HTTP responses exercise the official SDK and real local tools; they do not prove live decisions. [Earlier provider verification](reports/portfolio_verification.json). |
 | Limited real Gemini smoke check | **1 / 1** | Actual mixed-agent request, observed tool execution and source/score comparison. [Live report](reports/gemini_portfolio_smoke.json). |
 | Earlier interactive live checks | **10 / 10 + 2 / 2 HTTP checks** | Preserved earlier run; not rerun in full for this pass. [Earlier evidence](reports/live_prompt_regression.json). |
 
@@ -274,7 +274,7 @@ SQLite lookups bind parameters rather than interpolating input into SQL. Foreign
 
 ```text
 telecom/
-  api.py, ui.py                 REST backend and Streamlit client
+  api_factory.py, api.py, ui.py Shared REST factory, local server and UI
   workflow.py, tools.py         LangGraph state, agent nodes and bounded execution
   llm.py, gemini_llm.py         Prompts, citation checks and Gemini SDK integration
   rag.py, build_index.py        FAQ chunking, embeddings and FAISS retrieval
@@ -307,6 +307,10 @@ For a demonstration, start with roaming retrieval, then customer lookup, then th
 - Joblib artifacts must come from a trusted source. Validation does not make untrusted pickle files safe to load.
 
 ## Sharing the project
+
+Cloud preparation passed **20/20 cloud tests on Linux**, a **10/10 real Linux cold-start smoke**, and dependency checks. Peak measured Linux RSS was **681.5 MiB**, so actual hosted capacity is still a trial gate. [Verification and limitations](reports/cloud_preparation.json).
+
+A separate **offline private-cloud trial** is provided in `deploy/streamlit/app.py`. It starts an internal FastAPI backend, verifies the packaged trained model, initializes cloud SQLite/FAISS resources and enforces shared request limits. It ignores local `.env` credentials and cannot enable Gemini. See [exact deployment steps](docs/STREAMLIT_CLOUD.md). The app has not been deployed; hosted privacy and resource capacity still need verification.
 
 A short local recording is the recommended recruiter demo. The current API has no authentication or shared usage cap, and hosting only the Streamlit entry point would not start FastAPI. Keeping the Gemini key server-side protects the credential but does not stop visitors from repeatedly invoking the service.
 

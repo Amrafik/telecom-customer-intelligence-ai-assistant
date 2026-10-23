@@ -38,7 +38,8 @@ def load_embedder(path_or_name, **kwargs):
     return SentenceTransformer(str(path_or_name), device="cpu", trust_remote_code=False, **kwargs)
 
 
-def build_index(settings: Settings | None = None):
+def build_index(settings: Settings | None = None, *, index_dir: Path = INDEX_DIR,
+                embedding_dir: Path = EMBEDDING_DIR):
     settings = settings or Settings()
     embedder = load_embedder(settings.embedding_model, revision=settings.embedding_revision)
     documents = chunks(json.loads(FAQ_PATH.read_text(encoding="utf-8")))
@@ -46,21 +47,23 @@ def build_index(settings: Settings | None = None):
                              normalize_embeddings=True, convert_to_numpy=True).astype("float32")
     index = faiss.IndexFlatIP(vectors.shape[1])
     index.add(vectors)
-    INDEX_DIR.mkdir(parents=True, exist_ok=True)
-    embedder.save(str(EMBEDDING_DIR))
-    index_path = INDEX_DIR / "faqs.faiss"
+    index_dir.mkdir(parents=True, exist_ok=True)
+    embedder.save(str(embedding_dir))
+    index_path = index_dir / "faqs.faiss"
     faiss.write_index(index, str(index_path))
     metadata = {"model": settings.embedding_model, "revision": settings.embedding_revision,
                 "faqs_sha256": hashlib.sha256(FAQ_PATH.read_bytes()).hexdigest(),
                 "index_sha256": hashlib.sha256(index_path.read_bytes()).hexdigest(),
                 "dimension": vectors.shape[1], "chunk_words": 50, "overlap_words": 10,
                 "documents": documents}
-    (INDEX_DIR / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+    (index_dir / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     print(f"Saved {len(documents)} chunks, {vectors.shape[1]} dimensions, CPU embeddings and FAISS index.")
+    return embedder
 
 
 class Retriever:
-    def __init__(self, settings: Settings, index_dir: Path = INDEX_DIR):
+    def __init__(self, settings: Settings, index_dir: Path = INDEX_DIR, *,
+                 embedding_dir: Path = EMBEDDING_DIR, embedder=None):
         try:
             metadata = json.loads((index_dir / "metadata.json").read_text(encoding="utf-8"))
             path = index_dir / "faqs.faiss"
@@ -75,7 +78,7 @@ class Retriever:
             self.documents = metadata["documents"]
             if self.index.ntotal != len(self.documents) or self.index.d != metadata["dimension"]:
                 raise ValueError("Index metadata mismatch")
-            self.embedder = load_embedder(EMBEDDING_DIR, local_files_only=True)
+            self.embedder = embedder if embedder is not None else load_embedder(embedding_dir, local_files_only=True)
         except (OSError, ValueError, KeyError, RuntimeError) as exc:
             raise AppError("FAQ index unavailable or stale. Run python -m telecom.build_index.", "index_unavailable") from exc
         self.threshold = settings.retrieval_min_score
