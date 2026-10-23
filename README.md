@@ -1,5 +1,7 @@
 # Telecom Customer Intelligence AI Assistant
 
+**[Try the Hosted Demo (Offline Mode)](https://amrafik-telecom-ai.streamlit.app/)**
+
 **Telecom policy answers, customer lookup and churn prediction in one conversation.**
 
 A local telecom assistant that combines two LangGraph agents, Gemini function calling, FAQ retrieval and a trained churn model. It answers policy questions, retrieves customer profiles through SQLite and calculates churn risk with a saved Scikit-learn pipeline.
