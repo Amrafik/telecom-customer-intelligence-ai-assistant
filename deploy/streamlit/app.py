@@ -12,6 +12,7 @@ import httpx
 import streamlit as st
 
 from telecom.cloud_runtime import CloudLimits, get_runtime
+from telecom.conversation import previous_refusal
 from telecom.monitoring import event
 
 st.set_page_config(page_title="Telecom Customer Intelligence", page_icon="◉", layout="centered")
@@ -88,13 +89,15 @@ for message in st.session_state.messages:
             st.markdown(message["content"])
 
 if prompt := st.chat_input("Ask about plans, billing or customer churn…", disabled=not limits.enabled):
+    previous_intent = previous_refusal(st.session_state.messages)
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
     with st.chat_message("assistant"):
         try:
             response = httpx.post(runtime.url + "/chat", headers=runtime.headers,
-                                  json={"message": prompt, "customer_id": selected}, timeout=60, trust_env=False)
+                                  json={"message": prompt, "customer_id": selected,
+                                        "previous_intent": previous_intent}, timeout=60, trust_env=False)
             if response.status_code == 429:
                 st.warning("The shared demo allowance is busy or exhausted. Please try again later.")
             else:

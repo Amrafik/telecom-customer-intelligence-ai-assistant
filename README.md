@@ -73,6 +73,10 @@ The default search returns up to three results above a 0.35 similarity threshold
 
 Tools are read-only. The assistant cannot change accounts, cancel a service or apply an offer.
 
+You can also ask **“What can you do?”** or **“How do you work?”** Unrelated requests receive a short scope explanation; a follow-up such as **“Why not?”** explains the boundary. Local live mode uses Gemini's validated intent classification, then application-owned replies about verified capabilities—no extra generation call or tools for these cases. Offline mode uses explicit deterministic rules and labels these replies accordingly. The API returns an `intent` alongside the existing four-way graph `route`.
+
+Both interfaces send only the latest scope-refusal intent as a bounded follow-up hint. They do not send chat history, inherit customer IDs or add persistent conversational memory; each customer task still requires an explicit or selected ID.
+
 ## Model results
 
 The churn model uses the [UCI Iranian Churn dataset](https://archive.ics.uci.edu/dataset/563/iranian+churn+dataset): 3,150 anonymised records under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Features cover the first nine months; the churn label is measured at month twelve. Attribution, the source checksum and the feature dictionary are in [data/README.md](data/README.md) and [data/provenance.json](data/provenance.json).
@@ -214,7 +218,7 @@ These commands run the original local application without authentication. Keep b
 | Method and endpoint | Purpose |
 |---|---|
 | `GET /health` | Check database, churn model and FAQ index readiness; report mode and configured model. Does not call Gemini. |
-| `POST /chat` | Accept a message and optional customer ID; return answer, route, sources, tool trace, errors, request ID and latency. |
+| `POST /chat` | Accept a message, optional customer ID and optional bounded `previous_intent`; return answer, classified intent, graph route, sources, tool trace, errors, request ID and latency. |
 | `GET /customers/{customer_id}` | Return a validated fictional customer profile using the SQLite JOIN. |
 | `POST /predict` | Return churn probability, predicted class, threshold, model version and a dataset caveat. |
 
@@ -238,22 +242,25 @@ Build the local resources before running the suite:
 
 Recorded checks on **23 October 2026**:
 
+[Consolidated intent-handling verification](reports/intent_verification.json) records the current checks, preserved artifacts and limitations.
+
 | Check | Result | Scope and evidence |
 |---|---:|---|
-| Automated suite | **143 passed** | Local regression, simulated-provider integration and cloud wrapper tests, including the 30 evaluation cases. [Current JUnit report](reports/cloud_regression.xml); earlier 123-test report is preserved. |
-| Offline evaluation | **30 / 30** | Real SQL, inference, vector retrieval and rule-based orchestration; zero Gemini calls. [Case report](reports/evaluation.json). |
-| Mocked Gemini SDK contracts | **23 / 23**, included in the 143 | Simulated HTTP responses exercise the official SDK and real local tools; they do not prove live decisions. [Earlier provider verification](reports/portfolio_verification.json). |
-| Limited real Gemini smoke check | **1 / 1** | Actual mixed-agent request, observed tool execution and source/score comparison. [Live report](reports/gemini_portfolio_smoke.json). |
+| Automated suite | **173 passed** | Local regression, simulated-provider integration and cloud wrapper tests, including the 36 evaluation cases. [Current JUnit report](reports/intent_regression.xml); earlier 143/123-test reports are preserved. |
+| Offline evaluation | **36 / 36** | Real SQL, inference, vector retrieval and rule-based orchestration; zero Gemini calls. [Case report](reports/evaluation.json). |
+| Mocked Gemini SDK contracts | **29 / 29**, included in the 173 | Simulated HTTP responses exercise the official SDK, validated intents and real local tools; they do not prove live decisions. [JUnit report](reports/intent_regression.xml). |
+| Limited real Gemini smoke check | **5 / 5** | Four scope/self-description intents plus a combined telecom request; nine generation calls and one model-availability lookup. [Current live report](reports/gemini_intent_smoke.json). |
+| Linux cloud/conversation regression | **38 passed** | Ubuntu WSL subset, repeated on Linux with zero Gemini calls. [Linux JUnit report](reports/intent_linux_pytest.xml). |
 | Earlier interactive live checks | **10 / 10 + 2 / 2 HTTP checks** | Preserved earlier run; not rerun in full for this pass. [Earlier evidence](reports/live_prompt_regression.json). |
 
-The automated suite blocks external sockets and uses simulated responses for Gemini SDK contracts. Its remaining tests exercise local components, including deliberate failure injection; some tests replace dependencies to isolate error handling. No default test calls the live provider. The 23 mocked-SDK cases are included in the 143 tests, not an additional test run. Saved live reports check tool execution against SQL rows, pipeline output and retrieved evidence. They are small smoke tests, not an exhaustive answer-quality or security evaluation. The latest automated run also reported four upstream deprecation warnings.
+The automated suite blocks external sockets and uses simulated responses for Gemini SDK contracts. Its remaining tests exercise local components, including deliberate failure injection; some tests replace dependencies to isolate error handling. No default test calls the live provider. The 29 mocked-SDK cases are included in the 173 tests, not an additional test run. Saved live reports check tool execution against SQL rows, pipeline output and retrieved evidence. They are small smoke tests, not an exhaustive answer-quality or security evaluation. The latest Windows run took **48.16 seconds** with four upstream deprecation warnings; the Linux subset took **11.58 seconds** with seven warnings.
 
-The 30-case catalogue covers all eight FAQ topics, unsupported input, customer lookup, repeated predictions, tool permissions/dependencies/budgets and multi-agent partial results. The missing-model case points the real loader at an absent temporary file; it does not remove the working model or invent an error response. Offline excerpts are not a semantic answerability test: a document can be relevant without containing the requested price.
+The 36-case catalogue covers all eight FAQ topics, unsupported input, customer lookup, repeated predictions, tool permissions/dependencies/budgets and multi-agent partial results, plus scope replies, capabilities, architecture, refusal follow-ups, greetings and recovery to a supported task. The missing-model case points the real loader at an absent temporary file; it does not remove the working model or invent an error response. Offline excerpts are not a semantic answerability test: a document can be relevant without containing the requested price.
 
-Live checks are opt-in and consume API quota. This pass retained a single completed mixed-agent smoke report to limit usage. An earlier two-case attempt was interrupted before its report was written; it is not counted as a completed two-case run. Earlier live reports remain unchanged. To reproduce the small completed check:
+Live checks are opt-in and consume API quota. The current five-scenario run used one generation call for each scope intent and five for the combined request. The refusal follow-up used the actual preceding out-of-scope result; non-task replies executed no tools. The combined request executed `get_customer → predict_churn → search_faqs` and verified returned customer/model/FAQ evidence. Earlier live reports remain unchanged, including the previous 1/1 portfolio smoke; an interrupted earlier attempt is not counted as a completed run. To reproduce the current bounded check:
 
 ```powershell
-.\.venv\Scripts\python.exe -m telecom.evaluate_gemini --case combined --output reports/gemini_portfolio_smoke.json
+.\.venv\Scripts\python.exe -m telecom.evaluate_gemini --case combined --case scope_unrelated --case scope_followup --case scope_capabilities --case scope_architecture --output reports/gemini_intent_smoke.json
 ```
 
 To run all seven live scenarios:
@@ -282,6 +289,7 @@ SQLite lookups bind parameters rather than interpolating input into SQL. Foreign
 telecom/
   api_factory.py, api.py, ui.py Shared REST factory, local server and UI
   workflow.py, tools.py         LangGraph state, agent nodes and bounded execution
+  conversation.py               Offline intent rules, truthful scope replies, bounded follow-up hint
   llm.py, gemini_llm.py         Prompts, citation checks and Gemini SDK integration
   rag.py, build_index.py        FAQ chunking, embeddings and FAISS retrieval
   ml.py, train.py               Shared features, SQL lookup, inference and tuning
@@ -306,7 +314,7 @@ For a demonstration, start with roaming retrieval, then customer lookup, then th
 ## Limitations
 
 - The public hosted demo is offline-only; Gemini-powered functionality is available locally. Neither variant has production load-test/SLA evidence or real support/billing integration. The original local API has no viewer authentication.
-- Six fictional customers and eight English FAQs provide a small demonstration, without chat memory or broad telecom-policy coverage.
+- Six fictional customers and eight English FAQs provide a small demonstration, without general chat memory or broad telecom-policy coverage. A previous refusal-intent hint supports scope follow-ups only.
 - Public-data benchmarks do not establish local-market generalisation, probability calibration, fairness or business value.
 - Retrieval similarity and citation validation reduce some errors; neither guarantees factual entailment or resistance to every prompt injection.
 - Gemini availability and API quotas can change. Send only fictional demo data; review the provider's data-use terms before using another dataset.

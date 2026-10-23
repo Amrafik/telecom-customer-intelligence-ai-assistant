@@ -8,6 +8,7 @@ from typing import TypedDict
 from langgraph.graph import END, START, StateGraph
 
 from telecom.config import Settings
+from telecom.conversation import offline_route, scope_reply
 from telecom.errors import AppError
 from telecom.gemini_llm import GeminiLLM
 from telecom.ml import CustomerStore, Predictor
@@ -16,16 +17,7 @@ from telecom.rag import UNCERTAIN, Retriever
 from telecom.schemas import ChatRequest, ChatResponse, Source
 from telecom.tools import ToolContext, ToolExecutor, tool_spec
 
-KNOWLEDGE_WORDS = r"\b(plan|plans|bill|billing|roaming|roam|cancel|cancellation|payment|support|faq|allowance|policy|policies|minutes|charge|charges|help|complaint|refund|discount|data)\b"
-CUSTOMER_WORDS = r"\b(customer|profile|churn|risk|predict|prediction|leaving|likelihood)\b|CUST-"
 RISK_WORDS = r"\b(churn|risk|predict|prediction|leaving|likelihood)\b"
-
-
-def offline_route(message: str) -> str:
-    """Explicitly rule-based test mode; this is not the live LLM router."""
-    customer = bool(re.search(CUSTOMER_WORDS, message, re.I))
-    knowledge = bool(re.search(KNOWLEDGE_WORDS, message, re.I))
-    return "both" if customer and knowledge else "customer" if customer else "knowledge" if knowledge else "clarify"
 
 
 def resolve_customer(request: ChatRequest) -> tuple[str | None, str | None]:
@@ -41,6 +33,9 @@ class State(TypedDict, total=False):
     question: str
     customer_id: str | None
     route: str
+    intent: str
+    mode: str
+    previous_intent: str | None
     clarification: str
     context: ToolContext
     customer_answer: str
@@ -95,15 +90,16 @@ class Assistant:
 
     def _route(self, state):
         if state.get("clarification"):
-            route = "clarify"
+            intent = "clarify"
         else:
-            route = (offline_route(state["question"]) if self.settings.app_mode == "offline"
-                     else self.llm().route(state["question"], state["customer_id"]))
+            intent = (offline_route(state["question"], state.get("previous_intent")) if self.settings.app_mode == "offline"
+                      else self.llm().route(state["question"], state["customer_id"], state.get("previous_intent")))
+        route = intent if intent in {"customer", "knowledge", "both"} else "clarify"
         if route in {"customer", "both"} and not state["customer_id"]:
-            event("agent_selection", route="clarify", mode=self.settings.app_mode, provider="gemini")
-            return {"route": "clarify", "clarification": "Please provide a fictional customer ID, for example CUST-001."}
-        event("agent_selection", route=route, mode=self.settings.app_mode, provider="gemini")
-        return {"route": route}
+            event("agent_selection", route="clarify", intent=intent, mode=self.settings.app_mode, provider="gemini")
+            return {"route": "clarify", "intent": intent, "clarification": "Please provide a fictional customer ID, for example CUST-001."}
+        event("agent_selection", route=route, intent=intent, mode=self.settings.app_mode, provider="gemini")
+        return {"route": route, "intent": intent}
 
     def _run_tools(self, agent, state):
         results, history = {}, []
@@ -189,7 +185,7 @@ class Assistant:
 
     @staticmethod
     def _clarify(state):
-        return {"answer": state.get("clarification") or "I can help with fictional telecom policies and customer churn. Please ask a specific telecom question."}
+        return {"answer": state.get("clarification") or scope_reply(state["intent"], state["mode"])}
 
     @staticmethod
     def _combine(state):
@@ -209,9 +205,10 @@ class Assistant:
         context = ToolContext(customer_id, self.settings.max_tool_calls)
         try:
             result = self.graph.invoke({"question": request.message, "customer_id": customer_id,
+                                        "previous_intent": request.previous_intent, "mode": self.settings.app_mode,
                                         "clarification": clarification or "", "context": context},
                                        config={"recursion_limit": 12})
-            event("chat_completed", route=result["route"], mode=self.settings.app_mode, provider="gemini",
+            event("chat_completed", route=result["route"], intent=result["intent"], mode=self.settings.app_mode, provider="gemini",
                   status="error" if context.errors else "success", error_codes=context.errors,
                   latency_ms=round((time.perf_counter() - started) * 1000, 3))
         except Exception as exc:
@@ -222,6 +219,7 @@ class Assistant:
         finally:
             request_id_var.reset(token)
         return ChatResponse(answer=result["answer"], route=result["route"], mode=self.settings.app_mode,
+                            intent=result["intent"],
                             sources=result["sources"], tool_trace=context.trace, errors=context.errors,
                             request_id=request_id,
                             latency_ms=round((time.perf_counter() - started) * 1000, 3))

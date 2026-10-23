@@ -240,3 +240,36 @@ def test_no_evidence_skips_gemini_generation():
         assert llm.grounded_answer("Unknown policy?", []) == (UNCERTAIN, [])
     finally:
         llm.client.close()
+
+
+@pytest.mark.parametrize("message,previous,intent,expected", [
+    ("Write a cake recipe", None, "out_of_scope", "outside"),
+    ("What can you do?", None, "capabilities", "can't browse"),
+    ("How do you work?", None, "architecture", "LangGraph"),
+    ("Why not?", "out_of_scope", "refusal_followup", "focused on telecom"),
+    ("Why not?", "refusal_followup", "refusal_followup", "focused on telecom"),
+    ("Hello", None, "clarify", "What would you like"),
+])
+def test_live_scope_intents_use_one_validated_sdk_classification(message, previous, intent, expected):
+    requests = []
+    def provider_fixture(request):
+        body = json.loads(request.content)
+        requests.append(body)
+        assert body["generationConfig"]["responseJsonSchema"]["title"] == "RouteDecision"
+        task = json.loads(body["contents"][0]["parts"][0]["text"])
+        assert task["message"] == message and task["selected_customer_id"] == "CUST-001"
+        assert task.get("previous_intent") == previous
+        assert "tools" not in body
+        return httpx.Response(200, json=structured({"route": intent}))
+    llm = adapter(provider_fixture)
+    service = Assistant(llm.settings, llm=llm)
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Non-task intents must not execute tools")
+    service.tools.execute = forbidden
+    try:
+        result = service.chat(ChatRequest(message=message, customer_id="CUST-001", previous_intent=previous))
+        assert result.intent == intent and result.route == "clarify" and expected in result.answer
+        assert len(requests) == 1 and not result.errors and not result.tool_trace and not result.sources
+        assert "Offline mode" not in result.answer
+    finally:
+        llm.client.close()

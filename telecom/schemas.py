@@ -3,6 +3,9 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 CustomerID = Annotated[str, StringConstraints(pattern=r"^CUST-\d{3}$")]
+Intent = Literal["knowledge", "customer", "both", "clarify", "out_of_scope",
+                 "capabilities", "architecture", "refusal_followup"]
+RefusalIntent = Literal["out_of_scope", "refusal_followup"]
 
 
 class StrictModel(BaseModel):
@@ -31,6 +34,7 @@ class CustomerInput(StrictModel):
 class ChatRequest(StrictModel):
     message: str = Field(min_length=1, max_length=2000)
     customer_id: CustomerID | None = None
+    previous_intent: RefusalIntent | None = None
 
 
 class Prediction(StrictModel):
@@ -60,6 +64,7 @@ class ToolTrace(StrictModel):
 class ChatResponse(StrictModel):
     answer: str
     route: Literal["knowledge", "customer", "both", "clarify"]
+    intent: Intent
     mode: Literal["offline", "live"]
     sources: list[Source] = Field(default_factory=list)
     tool_trace: list[ToolTrace] = Field(default_factory=list)

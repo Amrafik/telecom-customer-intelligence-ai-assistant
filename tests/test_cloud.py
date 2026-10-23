@@ -220,6 +220,12 @@ def test_cloud_ui_chats_and_reruns_share_backend(assistant, tmp_path, monkeypatc
         assert [trace["tool"] for trace in result["tool_trace"]] == ["get_customer", "predict_churn", "search_faqs"]
         ui.run()
         assert not ui.exception and runtime.thread is thread
+        ui.chat_input[0].set_value("Write a cake recipe").run()
+        assert ui.session_state["messages"][-1]["result"]["intent"] == "out_of_scope"
+        ui.chat_input[0].set_value("Why not?").run()
+        result = ui.session_state["messages"][-1]["result"]
+        assert not ui.exception and result["intent"] == "refusal_followup" and result["mode"] == "offline"
+        assert "deterministic rules" in result["answer"] and not result["tool_trace"]
         ui.button[0].click().run()
         assert ui.session_state["messages"] == []
     finally:

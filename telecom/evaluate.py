@@ -30,10 +30,15 @@ def check_chat(case, assistant):
 
     assistant.tools.execute = observe
     try:
-        result = assistant.chat(ChatRequest(message=case["question"], customer_id=case.get("selected_customer_id")))
+        result = assistant.chat(ChatRequest(message=case["question"], customer_id=case.get("selected_customer_id"),
+                                            previous_intent=case.get("previous_intent")))
     finally:
         assistant.tools.execute = original_execute
     assert result.route == case["expected"], "Unexpected graph route"
+    if "expected_intent" in case:
+        assert result.intent == case["expected_intent"], "Unexpected classified intent"
+    if "answer_contains" in case:
+        assert case["answer_contains"] in result.answer, "Missing scoped response"
     assert [call["tool"] for call in executed] == case["expected_tools"], "Unexpected executed tools"
     statuses = ["success" if call["result"]["ok"] else "error" for call in executed]
     assert statuses == case.get("expected_statuses", ["success"] * len(executed))
@@ -46,7 +51,7 @@ def check_chat(case, assistant):
         assert any(source.source_id.startswith(f"faq:{case['expected_faq']}:") for source in result.sources)
     checks = evidence_checks(result.model_dump(), executed, assistant, case["id"], None)
     assert all(checks.values()), "Returned evidence differs from executed tools"
-    return {"route": result.route, "tools": case["expected_tools"], "tool_statuses": statuses,
+    return {"route": result.route, "intent": result.intent, "tools": case["expected_tools"], "tool_statuses": statuses,
             "error_codes": result.errors, "source_ids": [source.source_id for source in result.sources],
             "evidence_checks": checks}
 
@@ -134,7 +139,7 @@ def evaluate_offline():
             results.append(result)
     report = {"mode": "offline", "run_at": datetime.now(ZoneInfo("Africa/Cairo")).isoformat(),
               "scope": "Real SQL, sklearn inference, FAISS retrieval, LangGraph and REST; rule-based routing and extractive answers. One real missing-artifact fault injection; no mocked model outputs or Gemini calls.",
-              "provider_calls": 0, "case_set_version": 2, "case_kinds": dict(Counter(case["kind"] for case in cases)),
+              "provider_calls": 0, "case_set_version": 3, "case_kinds": dict(Counter(case["kind"] for case in cases)),
               "passed": sum(result["passed"] for result in results), "total": len(results), "cases": results}
     (ROOT / "reports").mkdir(exist_ok=True)
     (ROOT / "reports/evaluation.json").write_text(json.dumps(report, indent=2), encoding="utf-8")

@@ -95,10 +95,11 @@ Source files, FAQ/seed data and reports belong in a portfolio repository. Large/
 | `gemini_llm.py` | SDK transport, one-call validation and `native_history()` preservation. |
 | `tools.py` | Schemas, `ToolContext`, `tool_spec()`, `ToolExecutor.execute()`: execution boundary and per-request safeguards. |
 | `workflow.py` | `State`, `Assistant`, graph nodes and conditional edges; resource caching and response construction. |
+| `conversation.py` | Deterministic offline intent rules, truthful capability/scope replies and the bounded previous-refusal hint shared by both UIs. |
 | `api_factory.py`, `api.py` | `create_app()` defines four routes, middleware, safe errors and readiness. `api.py` constructs the local Uvicorn app; the cloud wrapper imports the factory without loading local configuration. |
 | `ui.py` | Streamlit chat, optional customer selector, HTTP requests and evidence rendering. |
 | `monitoring.py`, `monitor.py` | Correlated JSON events and observed request-latency summaries. |
-| `evaluate.py` | `check_chat()`, `check_case()`, `evaluate_offline()`: 30 deterministic regression cases; observed tool executions are checked against returned evidence. `--live` explicitly calls Gemini verification. |
+| `evaluate.py` | `check_chat()`, `check_case()`, `evaluate_offline()`: 36 deterministic regression cases; observed tool executions are checked against returned evidence. `--live` explicitly calls Gemini verification. |
 | `evaluate_gemini.py` | Opt-in live cases and `evidence_checks()` comparison against actual tool results. |
 
 `__init__.py` files identify Python packages; they do not contain application behavior. Packaging and test settings live in `pyproject.toml`, with direct and locked dependencies in the two requirements files.
@@ -109,7 +110,7 @@ Source files, FAQ/seed data and reports belong in a portfolio repository. Large/
 
 Important settings are `APP_MODE`, `GEMINI_MODEL`, `GEMINI_API_KEY`, `GEMINI_TIMEOUT_SECONDS`, the embedding model/revision, retrieval threshold and tool budget. Gemini is the only provider. The key is excluded from the settings representation and is not logged; it remains a secret string in server memory. Keep it only in the ignored `.env` file and leave `.env.example` blank of credentials. Environment variables override `.env`, so a stale terminal variable can override a corrected file value.
 
-`schemas.py` defines the data contracts. `ChatRequest` requires a nonblank message of at most 2,000 characters. Customer IDs follow `CUST-` and three digits. `Customer` validates the record fields and requires `fictional=True`. `Prediction`, `Source`, `ToolTrace` and `ChatResponse` describe response shapes. Unknown extra fields are rejected.
+`schemas.py` defines the data contracts. `ChatRequest` requires a nonblank message of at most 2,000 characters, an optional validated customer ID and an optional `previous_intent` restricted to two refusal labels. Customer IDs follow `CUST-` and three digits. `Customer` validates the record fields and requires `fictional=True`. `Prediction`, `Source`, `ToolTrace` and `ChatResponse` describe response shapes, including classified intent separately from graph route. Unknown extra fields are rejected.
 
 Pydantic validates **structure and basic ranges**. It does not prove that a question is safe, a generated sentence is true or a model is accurate. Those require separate controls and evaluation.
 
@@ -320,7 +321,7 @@ The two agents are specialisations within one application, using one Gemini serv
 
 ### 7.2 State, nodes and edges
 
-`State` in `workflow.py` is a typed dictionary containing the question, chosen customer ID, route, tool context, agent answers and sources. Each node reads the relevant state and returns updates.
+`State` in `workflow.py` is a typed dictionary containing the question, chosen customer ID, classified intent, execution route, mode, optional refusal hint, tool context, agent answers and sources. Each node reads the relevant state and returns updates.
 
 `Assistant.__init__()` builds and compiles this graph:
 
@@ -338,7 +339,11 @@ START → router
 
 **`resolve_customer()`** extracts an explicitly written ID or uses the selected customer. It asks for clarification on malformed/multiple/conflicting IDs. The LLM cannot invent an ID to access another record.
 
-**`_route()`** uses `offline_route()` only in offline mode and Gemini's shared `route()` in live mode. The live route is validated as one of four labels. Its instructions explicitly distinguish customer profiles and usage from general policy questions, with examples such as `Show the profile for CUST-002.`. The router identifies intent; it does not decide whether a record exists or a requested policy fact is available. The workflow validates IDs, SQL checks record existence and RAG checks evidence. Customer routes without an ID become clarification before tools run. `Assistant.llm()` constructs the Gemini client lazily; offline mode never constructs it.
+**`_route()`** uses `conversation.offline_route()` only in offline mode and Gemini's shared `route()` in live mode. Pydantic validates eight intent labels: `knowledge`, `customer`, `both`, `clarify`, `out_of_scope`, `capabilities`, `architecture` and `refusal_followup`. The first three retain their agent routes; the remaining intents use the existing `clarify` node, preserving the graph's four paths. The response exposes both the classified `intent` and execution `route`. Its instructions distinguish customer lookups from policies and from questions about the assistant itself. The router does not decide whether a record exists or a requested policy fact is available. The workflow validates IDs, SQL checks record existence and RAG checks evidence. Customer routes without an ID become clarification before tools run. `Assistant.llm()` constructs the Gemini client lazily; offline mode never constructs it.
+
+**`conversation.py`** keeps the offline rules and short application-owned scope replies together. `scope_reply()` describes only implemented functions and the current mode; it does not ask Gemini to invent a self-description or answer unrelated topics. In live mode, the validated intent comes from one actual Gemini classification request. Non-task intents execute no tools or FAQ generation. In offline mode, the reply identifies deterministic rules. Unknown prices remain a policy-retrieval task, not an out-of-scope refusal.
+
+**Refusal follow-ups:** `previous_refusal()` reads only the latest completed assistant response in either UI and returns `out_of_scope` or `refusal_followup`, otherwise `None`. `ChatRequest.previous_intent` accepts only these two strings or null. The API client can supply this hint, so it is untrusted context, not authorization. No previous text, SQL record, score or customer ID is passed. A new telecom task takes precedence, and clearing chat clears the hint. For example, a recipe request receives scope guidance, then “Why not?” receives an explanation; “Show the profile” still needs an ID. This is limited continuity, not general conversation memory.
 
 **`_run_tools()`** runs the existing bounded loop. In live mode it calls `choose_tool()`, executes through the same registry and appends the real `function_call_output`. The internal result record is translated by the Gemini adapter to a native `FunctionResponse`. The graph does not need provider-specific branches in its nodes or tool loop. It stops on failure, sufficient results or its step limit.
 
@@ -348,7 +353,7 @@ START → router
 
 **`_combine()`** joins the two contributions and their evidence. It uses deterministic formatting rather than another LLM call, keeping cost and the risk of changing numbers lower.
 
-**`chat()`** creates a fresh context, invokes the graph with recursion limit 12, emits correlated events and returns the validated `ChatResponse`. Each request has independent state; there is no persistent conversation memory.
+**`chat()`** creates a fresh tool context, invokes the graph with recursion limit 12, emits correlated events including classified intent and returns the validated `ChatResponse`. Each request has independent customer/tool state. Only the bounded client-supplied refusal hint can carry across turns; there is no persistent conversation memory.
 
 ### 7.4 Bounded autonomy and validation
 
@@ -384,7 +389,7 @@ The client receives the key explicitly, so a separate `GOOGLE_API_KEY` does not 
 
 ### Structured decisions
 
-`structured()` calls `client.models.generate_content()` with a JSON response schema, then independently validates the returned text with Pydantic. `route()` requests one of four labels, rather than letting the model name arbitrary graph nodes. `grounded_answer()` requests an answer and source IDs, then applies the evidence checks described earlier.
+`structured()` calls `client.models.generate_content()` with a JSON response schema, then independently validates the returned text with Pydantic. `route()` requests one of eight intent labels, rather than letting the model name arbitrary graph nodes; the workflow maps them onto its existing four execution paths. `grounded_answer()` requests an answer and source IDs, then applies the evidence checks described earlier.
 
 `_config()` limits output to 2,048 tokens, uses a low thinking level on Gemini 3 models and disables SDK automatic function execution. `_generate()` maps provider HTTP failures and timeouts to safe application errors. It logs categories/status/type, not raw response bodies. Retries are disabled, so rate-limit failures cannot secretly multiply requests. A per-call timeout does not imply a whole-workflow deadline; a multi-call request can take longer.
 
@@ -444,7 +449,7 @@ The health endpoint checks local resources and reports Gemini, its model and whe
 
 `ui.py` is an HTTP client. It never opens SQLite or loads the ML model. The sidebar lets a user choose a fictional customer and see service readiness and the backend mode. “AI-assisted” corresponds to live mode and “Offline” to deterministic local mode; changing display labels does not change `APP_MODE`. The chat sends JSON to FastAPI using `httpx` and shows answers, source excerpts and the tool trace.
 
-The displayed chat history is a UI convenience, limited to recent messages. That history is not submitted to the graph as conversational memory. Questions remain independent; “What about this customer?” without an ID or selected customer may need clarification.
+The displayed chat history is a UI convenience, limited to recent messages. Its text is not submitted to the graph as conversational memory. Both interfaces pass only an allowlisted previous refusal-intent hint for scope reactions. Customer questions remain independent; “What about this customer?” without an ID or selected customer may need clarification.
 
 Keeping UI and backend separate demonstrates an API boundary and lets a different client reuse the same prediction service. The local application runs these as separate processes; the hosted offline wrapper starts an internal backend in the Streamlit process. Neither arrangement is a production microservice architecture.
 
@@ -456,7 +461,7 @@ Raw customer records, questions and API keys are omitted from logs. Logs rotate 
 
 These statistics include development and deliberately failing tests. A high failure count after testing can be expected, and a latency percentile from those requests is not a production performance benchmark. Cold embedding/model loading also makes initial requests slower than warmed requests.
 
-`data/evaluation_cases.json` defines **30 regression cases**, all passing in the final run. `evaluate_offline()` runs real SQL, model inference, vector search, LangGraph and REST operations, with deterministic routing and extractive answers. It saves each result and its scope in `reports/evaluation.json`; it makes zero Gemini calls. Retrieval cases span all eight FAQ topics. Other cases check profile-only lookup, prediction consistency, mixed profile/policy and prediction/policy requests, unknown IDs, conflicting IDs, invalid requests, unsupported topics, lookup dependencies, duplicate calls, exhausted budgets and disallowed tools.
+`data/evaluation_cases.json` defines **36 regression cases**. `evaluate_offline()` runs real SQL, model inference, vector search, LangGraph and REST operations, with deterministic routing and extractive answers. It saves each result and its scope in `reports/evaluation.json`; it makes zero Gemini calls. Retrieval cases span all eight FAQ topics. Other cases check profile-only lookup, prediction consistency, mixed profile/policy and prediction/policy requests, unknown IDs, conflicting IDs, invalid requests, unsupported topics, lookup dependencies, duplicate calls, exhausted budgets and disallowed tools. Six added cases cover distinct scope replies, capabilities, architecture, refusal reactions, greetings and recovery to a real customer lookup. These are deterministic checks, not proof that Gemini always classifies correctly.
 
 `check_chat()` temporarily observes the actual tool executor. It compares route, call order, success/error status, trace and source types with the case specification. The shared `evidence_checks()` also compares returned customer evidence with the SQL JOIN, probabilities with the fitted pipeline, and citations with the retrieved excerpts. These checks are stronger than checking whether an answer contains a keyword, but do not establish that every possible generated sentence is supported.
 
@@ -467,7 +472,7 @@ Keep these evaluation categories distinct:
 | Evaluation | What it measures | What it does not prove |
 |---|---|---|
 | Held-out ML benchmark | Classification performance on public-data holdout. | Egypt/Vodafone/general deployment performance. |
-| Offline regression cases | Expected application behavior on 30 cases. | Live LLM decision or answer quality. |
+| Offline regression cases | Expected application behavior on 36 cases. | Live LLM decision or answer quality. |
 | Automated SDK contract tests | Integration with simulated provider payloads. | Successful real provider responses. |
 | Optional live smoke checks | Small provider-backed workflow checks. | Robustness across all user questions. |
 
@@ -481,11 +486,17 @@ The executed command was:
 
 The portfolio-publication regression result was **123 passed in 36.47 seconds**, with four upstream deprecation warnings and no failed or skipped tests. The JUnit evidence is `reports/pytest.xml`. Of these tests, **23** are explicitly marked `mocked_llm`: they simulate Google SDK responses to test the provider contract. They were a subset of 123, not an additional run or proof of live Gemini behavior. Other tests exercise local components and deliberately inject some failures.
 
-The 30 catalogue cases run both through the standalone evaluation command and as parameterized pytest checks. Those are two executions of the same cases, not 60 distinct scenarios. The catalogue test also checks unique IDs and coverage of all eight FAQ topics. A separate test rejects unknown evaluation kinds.
+The subsequent intent-handling regression passed **173 tests in 48.16 seconds**, with four upstream warnings; `reports/intent_regression.xml` preserves that current run. It includes **29 simulated SDK contract cases**, rather than counting them as extra tests. The standalone offline evaluator passed **36/36**, and a repeated Linux cloud/conversation subset passed **38 tests in 11.58 seconds** with seven warnings (`reports/intent_linux_pytest.xml`). These Linux tests are a subset of the Windows suite, not additional distinct scenarios or a managed-host load test.
 
-One completed, real Gemini mixed-agent smoke passed **1/1** during this portfolio pass, before the final UI wording and documentation edits. `reports/gemini_portfolio_smoke.json` records the three actual tool executions and SQL/model/source comparisons. The workflow, prompts and model were unchanged after that run, so it was not repeated solely for documentation. A previously interrupted two-case attempt has no completed report and is not counted as a completed evaluation. Earlier seven-case and interactive live reports remain historical evidence; they are not fresh results from the final offline run.
+Real Gemini verification passed **5/5** selected scenarios: unrelated question, reaction to its actual refusal, capabilities, architecture and a combined customer/policy request. The first four each used one validated classification call and no tools; the combined case used five generation calls and executed the actual lookup, prediction and FAQ search. Nine generation calls plus one model-availability lookup were made, with no automatic retries. `reports/gemini_intent_smoke.json` records requests, classifications, responses and evidence comparisons. This small sample does not establish general intent accuracy or exhaustive semantic grounding.
+
+The 36 catalogue cases run both through the standalone evaluation command and as parameterized pytest checks. Those are two executions of the same cases, not 72 distinct scenarios. The catalogue test also checks unique IDs and coverage of all eight FAQ topics. A separate test rejects unknown evaluation kinds.
+
+Historically, a real Gemini mixed-agent smoke passed **1/1** during the earlier portfolio pass. `reports/gemini_portfolio_smoke.json` preserves the three tool executions and SQL/model/source comparisons from that version. It predates the current intent-classification prompt changes; the five-scenario report above is the fresh recheck. A previously interrupted two-case attempt has no completed report and is not counted as a completed evaluation. Earlier seven-case and interactive live reports remain historical evidence; they are not fresh results from the current run.
 
 Use `python -m telecom.evaluate_gemini --case combined --output reports/gemini_portfolio_smoke.json` to request a small live recheck deliberately. One scenario involves several model calls for routing, tools and generation. `--output` lets you preserve earlier reports; without it, a selected run replaces `gemini_live_audit.json` and a full run replaces `gemini_live_evaluation.json`. Default pytest never calls Gemini.
+
+The original seven live scenarios remain the default for `--live`. The four scope cases are explicit opt-ins; the [README](README.md#testing-and-verification) shows the five-scenario command. Selecting `scope_followup` requires `scope_unrelated` in the same run so the evaluator uses a real preceding refusal rather than fabricating history.
 
 | File | Important behavior checked |
 |---|---|
@@ -496,8 +507,9 @@ Use `python -m telecom.evaluate_gemini --case combined --output reports/gemini_p
 | `test_api.py` | Real endpoint behavior, input validation, sources/headers, correlated logs, 404/503 errors. |
 | `test_gemini_contract.py` | Google SDK requests, native history/signatures, one-call enforcement, lazy Gemini construction, errors, timeouts and no retries. |
 | `test_gemini_evaluation.py` | Live-check validator rejects changed source excerpts and invented model probabilities, without calling a live provider. |
-| `test_ui.py` | Streamlit sends two questions to a real loopback FastAPI server, rerenders history and clears the chat. |
-| `test_evaluation.py` | All 30 catalogue scenarios, unique IDs, eight-topic coverage and unknown-kind rejection (32 tests). |
+| `test_ui.py` | Streamlit sends telecom questions and a refusal/follow-up pair to a real loopback FastAPI server, rerenders history and clears the chat. |
+| `test_conversation.py` | Distinct deterministic replies, no tool/provider calls for scope intents, bounded hint validation, request logging and supported-task/customer-ID isolation. |
+| `test_evaluation.py` | All 36 catalogue scenarios, unique IDs, eight-topic coverage and unknown-kind rejection (38 tests). |
 
 The autouse fixture blocks external socket connections and puts embedding libraries into offline mode. Local loopback connections and mock transports remain allowed. Thus tests require the previously built local model/index/database, but no paid key or external service.
 

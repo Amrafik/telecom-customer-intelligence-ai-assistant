@@ -39,6 +39,12 @@ def test_streamlit_chat_uses_real_fastapi(assistant, monkeypatch):
         ui.run()
         assert not ui.exception and len(ui.chat_message) == 4
         assert not ui.get("doc_string")
+        ui.chat_input[0].set_value("Write a cake recipe").run()
+        assert ui.session_state["messages"][-1]["result"]["intent"] == "out_of_scope"
+        ui.chat_input[0].set_value("Why not?").run()
+        result = ui.session_state["messages"][-1]["result"]
+        assert not ui.exception and result["intent"] == "refusal_followup"
+        assert "focused on telecom" in result["answer"] and not result["tool_trace"]
         ui.button[0].click().run()
         assert not ui.exception
         assert ui.session_state["messages"] == [] and not ui.chat_message

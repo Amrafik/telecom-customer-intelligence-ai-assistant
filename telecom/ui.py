@@ -2,6 +2,7 @@ import httpx
 import streamlit as st
 
 from telecom.config import Settings
+from telecom.conversation import previous_refusal
 
 settings = Settings()
 st.set_page_config(page_title="Telecom Customer Intelligence", page_icon="◉", layout="centered")
@@ -46,7 +47,10 @@ def show_result(result):
     st.markdown(result["answer"])
     route_names = {"knowledge": "Knowledge Agent", "customer": "Customer Intelligence Agent",
                    "both": "Both agents", "clarify": "Clarification"}
-    st.caption(f"{route_names[result['route']]} · {result['mode']} · {result['latency_ms'] / 1000:.2f}s")
+    intent_names = {"capabilities": "Capabilities", "architecture": "How it works",
+                    "out_of_scope": "Scope guidance", "refusal_followup": "Scope explanation"}
+    label = intent_names.get(result.get("intent"), route_names[result["route"]])
+    st.caption(f"{label} · {result['mode']} · {result['latency_ms'] / 1000:.2f}s")
     if result["sources"]:
         with st.expander("Sources and evidence"):
             for source in result["sources"]:
@@ -73,6 +77,7 @@ for message in st.session_state.messages:
             st.markdown(message["content"])
 
 if prompt := st.chat_input("Ask about plans, billing or customer churn…"):
+    previous_intent = previous_refusal(st.session_state.messages)
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -80,7 +85,8 @@ if prompt := st.chat_input("Ask about plans, billing or customer churn…"):
         with st.spinner("Preparing your answer…"):
             try:
                 response = httpx.post(f"{settings.backend_url}/chat",
-                                      json={"message": prompt, "customer_id": selected}, timeout=240)
+                                      json={"message": prompt, "customer_id": selected,
+                                            "previous_intent": previous_intent}, timeout=240)
                 response.raise_for_status()
                 result = response.json()
                 show_result(result)

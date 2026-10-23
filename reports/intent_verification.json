@@ -1,0 +1,60 @@
+{
+  "run_at": "2026-10-23T12:55:07.005657+00:00",
+  "scope": "Bounded intent handling; existing graph, tools, model and retrieval architecture preserved.",
+  "windows_pytest": {
+    "tests": 173,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "junit_seconds": 48.081,
+    "report": "reports/intent_regression.xml",
+    "console_seconds": 48.16,
+    "upstream_warnings": 4
+  },
+  "linux_cloud_conversation_subset": {
+    "tests": 38,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "junit_seconds": 11.566,
+    "report": "reports/intent_linux_pytest.xml",
+    "console_seconds": 11.58,
+    "upstream_warnings": 7,
+    "environment": "Ubuntu WSL / Python 3.12.3; not Community Cloud"
+  },
+  "mocked_gemini_sdk_cases": {
+    "passed": 29,
+    "included_in_windows_total": true
+  },
+  "offline_evaluation": {
+    "passed": 36,
+    "total": 36,
+    "provider_calls": 0,
+    "case_set_version": 3
+  },
+  "live_gemini": {
+    "passed": 5,
+    "total": 5,
+    "generate_content_calls": 9,
+    "model_availability_requests": 1,
+    "report": "reports/gemini_intent_smoke.json",
+    "automatic_retries": false
+  },
+  "dependencies": {
+    "windows_pip_check": "No broken requirements found.",
+    "linux_pip_check": "No broken requirements found."
+  },
+  "preservation": {
+    "original_artifact_hashes_unchanged": 9,
+    "tools_cloud_guards_config_dependencies_ml_rag_training_unchanged": true,
+    "cloud_mode": "offline only; no Gemini credential"
+  },
+  "checks": {
+    "local_documentation_links": 55,
+    "tracked_and_staged_files_scanned": 96,
+    "credential_or_pattern_matches": 0,
+    "secret_paths_ignored": true,
+    "new_large_files_over_1_mib": 0
+  },
+  "limitations": "Small live smoke set, not broad classification/entailment accuracy. Offline rules have limited phrase coverage. Client refusal hint is untrusted context, not memory or authorization. Existing upstream deprecation warnings remain. Historical Linux cold-start and managed-host capacity were not rerun as load tests."
+}

@@ -1,9 +1,9 @@
 {
   "mode": "offline",
-  "run_at": "2026-10-23T14:11:09.501108+03:00",
+  "run_at": "2026-10-23T15:50:01.597363+03:00",
   "scope": "Real SQL, sklearn inference, FAISS retrieval, LangGraph and REST; rule-based routing and extractive answers. One real missing-artifact fault injection; no mocked model outputs or Gemini calls.",
   "provider_calls": 0,
-  "case_set_version": 2,
+  "case_set_version": 3,
   "case_kinds": {
     "retrieval": 8,
     "retrieval_miss": 1,
@@ -21,11 +21,11 @@
     "tool_budget": 1,
     "wrong_id": 1,
     "wrong_tool": 1,
-    "chat": 3,
+    "chat": 9,
     "missing_model": 1
   },
-  "passed": 30,
-  "total": 30,
+  "passed": 36,
+  "total": 36,
   "cases": [
     {
       "id": "retrieval_roaming",
@@ -40,7 +40,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 12263.467
+      "latency_ms": 6493.607
     },
     {
       "id": "retrieval_billing",
@@ -59,7 +59,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 8.392
+      "latency_ms": 8.395
     },
     {
       "id": "retrieval_cancellation",
@@ -74,7 +74,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 8.327
+      "latency_ms": 8.188
     },
     {
       "id": "retrieval_plans",
@@ -91,7 +91,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 8.099
+      "latency_ms": 8.544
     },
     {
       "id": "retrieval_no_evidence",
@@ -101,13 +101,14 @@
       },
       "kind": "retrieval_miss",
       "mode": "offline",
-      "latency_ms": 7.561
+      "latency_ms": 6.582
     },
     {
       "id": "route_knowledge",
       "passed": true,
       "detail": {
         "route": "knowledge",
+        "intent": "knowledge",
         "tools": [
           "search_faqs"
         ],
@@ -124,13 +125,14 @@
       },
       "kind": "route",
       "mode": "offline",
-      "latency_ms": 18.014
+      "latency_ms": 14.097
     },
     {
       "id": "route_customer",
       "passed": true,
       "detail": {
         "route": "customer",
+        "intent": "customer",
         "tools": [
           "get_customer",
           "predict_churn"
@@ -153,13 +155,14 @@
       },
       "kind": "route",
       "mode": "offline",
-      "latency_ms": 346.527
+      "latency_ms": 201.046
     },
     {
       "id": "route_both",
       "passed": true,
       "detail": {
         "route": "both",
+        "intent": "both",
         "tools": [
           "get_customer",
           "predict_churn",
@@ -185,13 +188,14 @@
       },
       "kind": "route",
       "mode": "offline",
-      "latency_ms": 35.836
+      "latency_ms": 26.112
     },
     {
       "id": "route_clarify",
       "passed": true,
       "detail": {
         "route": "clarify",
+        "intent": "out_of_scope",
         "tools": [],
         "tool_statuses": [],
         "error_codes": [],
@@ -202,7 +206,7 @@
       },
       "kind": "route",
       "mode": "offline",
-      "latency_ms": 1.766
+      "latency_ms": 2.174
     },
     {
       "id": "sql_join_lookup",
@@ -223,7 +227,7 @@
       },
       "kind": "lookup",
       "mode": "offline",
-      "latency_ms": 1.03
+      "latency_ms": 0.948
     },
     {
       "id": "unknown_customer",
@@ -234,7 +238,7 @@
       },
       "kind": "unknown_customer",
       "mode": "offline",
-      "latency_ms": 4.621
+      "latency_ms": 3.907
     },
     {
       "id": "prediction_repeatability",
@@ -249,13 +253,14 @@
       },
       "kind": "prediction",
       "mode": "offline",
-      "latency_ms": 30.45
+      "latency_ms": 29.05
     },
     {
       "id": "combined_graph",
       "passed": true,
       "detail": {
         "route": "both",
+        "intent": "both",
         "tools": [
           "get_customer",
           "predict_churn",
@@ -281,13 +286,14 @@
       },
       "kind": "combined",
       "mode": "offline",
-      "latency_ms": 30.381
+      "latency_ms": 27.929
     },
     {
       "id": "missing_id_clarification",
       "passed": true,
       "detail": {
         "route": "clarify",
+        "intent": "customer",
         "tools": [],
         "tool_statuses": [],
         "error_codes": [],
@@ -298,13 +304,14 @@
       },
       "kind": "clarification",
       "mode": "offline",
-      "latency_ms": 1.59
+      "latency_ms": 1.474
     },
     {
       "id": "conflicting_id_clarification",
       "passed": true,
       "detail": {
         "route": "clarify",
+        "intent": "clarify",
         "tools": [],
         "tool_statuses": [],
         "error_codes": [],
@@ -315,7 +322,7 @@
       },
       "kind": "conflicting_ids",
       "mode": "offline",
-      "latency_ms": 1.25
+      "latency_ms": 1.196
     },
     {
       "id": "empty_message_rejected",
@@ -325,7 +332,7 @@
       },
       "kind": "bad_request",
       "mode": "offline",
-      "latency_ms": 20.088
+      "latency_ms": 1.642
     },
     {
       "id": "sql_injection_rejected",
@@ -335,7 +342,7 @@
       },
       "kind": "bad_predict",
       "mode": "offline",
-      "latency_ms": 1.355
+      "latency_ms": 1.17
     },
     {
       "id": "prediction_requires_lookup",
@@ -354,7 +361,7 @@
       },
       "kind": "lookup_required",
       "mode": "offline",
-      "latency_ms": 0.908
+      "latency_ms": 0.842
     },
     {
       "id": "duplicate_call_blocked",
@@ -379,7 +386,7 @@
       },
       "kind": "duplicate_call",
       "mode": "offline",
-      "latency_ms": 0.936
+      "latency_ms": 0.673
     },
     {
       "id": "tool_budget_enforced",
@@ -404,7 +411,7 @@
       },
       "kind": "tool_budget",
       "mode": "offline",
-      "latency_ms": 1.031
+      "latency_ms": 0.613
     },
     {
       "id": "tool_id_bound_to_user",
@@ -423,7 +430,7 @@
       },
       "kind": "wrong_id",
       "mode": "offline",
-      "latency_ms": 0.089
+      "latency_ms": 0.056
     },
     {
       "id": "agent_tool_allowlist",
@@ -448,7 +455,7 @@
       },
       "kind": "wrong_tool",
       "mode": "offline",
-      "latency_ms": 0.099
+      "latency_ms": 0.08
     },
     {
       "id": "retrieval_payment",
@@ -467,7 +474,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 10.59
+      "latency_ms": 7.121
     },
     {
       "id": "retrieval_support",
@@ -482,7 +489,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 10.898
+      "latency_ms": 7.701
     },
     {
       "id": "retrieval_data_alerts",
@@ -499,7 +506,7 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 10.813
+      "latency_ms": 7.811
     },
     {
       "id": "retrieval_plan_change",
@@ -518,13 +525,14 @@
       },
       "kind": "retrieval",
       "mode": "offline",
-      "latency_ms": 10.639
+      "latency_ms": 8.021
     },
     {
       "id": "profile_lookup_only",
       "passed": true,
       "detail": {
         "route": "customer",
+        "intent": "customer",
         "tools": [
           "get_customer"
         ],
@@ -542,13 +550,14 @@
       },
       "kind": "chat",
       "mode": "offline",
-      "latency_ms": 4.759
+      "latency_ms": 3.368
     },
     {
       "id": "combined_profile_plan",
       "passed": true,
       "detail": {
         "route": "both",
+        "intent": "both",
         "tools": [
           "get_customer",
           "search_faqs"
@@ -571,13 +580,14 @@
       },
       "kind": "chat",
       "mode": "offline",
-      "latency_ms": 16.604
+      "latency_ms": 14.328
     },
     {
       "id": "combined_missing_customer_policy",
       "passed": true,
       "detail": {
         "route": "both",
+        "intent": "both",
         "tools": [
           "get_customer",
           "search_faqs"
@@ -598,13 +608,14 @@
       },
       "kind": "chat",
       "mode": "offline",
-      "latency_ms": 14.124
+      "latency_ms": 10.691
     },
     {
       "id": "missing_model_partial_result",
       "passed": true,
       "detail": {
         "route": "both",
+        "intent": "both",
         "tools": [
           "get_customer",
           "predict_churn",
@@ -630,7 +641,122 @@
       },
       "kind": "missing_model",
       "mode": "offline",
-      "latency_ms": 25.335
+      "latency_ms": 19.17
+    },
+    {
+      "id": "scope_unrelated",
+      "passed": true,
+      "detail": {
+        "route": "clarify",
+        "intent": "out_of_scope",
+        "tools": [],
+        "tool_statuses": [],
+        "error_codes": [],
+        "source_ids": [],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true
+        }
+      },
+      "kind": "chat",
+      "mode": "offline",
+      "latency_ms": 1.373
+    },
+    {
+      "id": "scope_capabilities",
+      "passed": true,
+      "detail": {
+        "route": "clarify",
+        "intent": "capabilities",
+        "tools": [],
+        "tool_statuses": [],
+        "error_codes": [],
+        "source_ids": [],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true
+        }
+      },
+      "kind": "chat",
+      "mode": "offline",
+      "latency_ms": 0.981
+    },
+    {
+      "id": "scope_architecture",
+      "passed": true,
+      "detail": {
+        "route": "clarify",
+        "intent": "architecture",
+        "tools": [],
+        "tool_statuses": [],
+        "error_codes": [],
+        "source_ids": [],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true
+        }
+      },
+      "kind": "chat",
+      "mode": "offline",
+      "latency_ms": 0.881
+    },
+    {
+      "id": "scope_refusal_followup",
+      "passed": true,
+      "detail": {
+        "route": "clarify",
+        "intent": "refusal_followup",
+        "tools": [],
+        "tool_statuses": [],
+        "error_codes": [],
+        "source_ids": [],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true
+        }
+      },
+      "kind": "chat",
+      "mode": "offline",
+      "latency_ms": 0.93
+    },
+    {
+      "id": "scope_greeting",
+      "passed": true,
+      "detail": {
+        "route": "clarify",
+        "intent": "clarify",
+        "tools": [],
+        "tool_statuses": [],
+        "error_codes": [],
+        "source_ids": [],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true
+        }
+      },
+      "kind": "chat",
+      "mode": "offline",
+      "latency_ms": 0.968
+    },
+    {
+      "id": "scope_recovery_customer",
+      "passed": true,
+      "detail": {
+        "route": "customer",
+        "intent": "customer",
+        "tools": [
+          "get_customer"
+        ],
+        "tool_statuses": [
+          "success"
+        ],
+        "error_codes": [],
+        "source_ids": [
+          "customer:CUST-002"
+        ],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true,
+          "customer_source_equals_sql_join": true
+        }
+      },
+      "kind": "chat",
+      "mode": "offline",
+      "latency_ms": 2.579
     }
   ]
 }

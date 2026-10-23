@@ -261,5 +261,67 @@
     ],
     "expected_customer_id": "CUST-001",
     "expected_faq": "cancellation"
+  },
+  {
+    "id": "scope_unrelated",
+    "kind": "chat",
+    "question": "Help me write a poem",
+    "expected": "clarify",
+    "expected_intent": "out_of_scope",
+    "answer_contains": "outside this telecom assistant",
+    "expected_tools": [],
+    "expected_source_types": []
+  },
+  {
+    "id": "scope_capabilities",
+    "kind": "chat",
+    "question": "What can you do?",
+    "expected": "clarify",
+    "expected_intent": "capabilities",
+    "answer_contains": "no Gemini API calls",
+    "expected_tools": [],
+    "expected_source_types": []
+  },
+  {
+    "id": "scope_architecture",
+    "kind": "chat",
+    "question": "How do you work?",
+    "expected": "clarify",
+    "expected_intent": "architecture",
+    "answer_contains": "LangGraph",
+    "expected_tools": [],
+    "expected_source_types": []
+  },
+  {
+    "id": "scope_refusal_followup",
+    "kind": "chat",
+    "question": "Why not?",
+    "previous_intent": "out_of_scope",
+    "expected": "clarify",
+    "expected_intent": "refusal_followup",
+    "answer_contains": "focused on telecom",
+    "expected_tools": [],
+    "expected_source_types": []
+  },
+  {
+    "id": "scope_greeting",
+    "kind": "chat",
+    "question": "Hello",
+    "expected": "clarify",
+    "expected_intent": "clarify",
+    "answer_contains": "What would you like to explore",
+    "expected_tools": [],
+    "expected_source_types": []
+  },
+  {
+    "id": "scope_recovery_customer",
+    "kind": "chat",
+    "question": "Show the profile for CUST-002.",
+    "previous_intent": "out_of_scope",
+    "expected": "customer",
+    "expected_intent": "customer",
+    "expected_tools": ["get_customer"],
+    "expected_source_types": ["customer"],
+    "expected_customer_id": "CUST-002"
   }
 ]

@@ -4,6 +4,8 @@ Assessment date: 23 October 2026; updated to reflect the owner's subsequent publ
 
 The [public hosted demo](https://amrafik-telecom-ai.streamlit.app/) is deployed on Streamlit Community Cloud. It uses deterministic routing with real SQLite lookups, Scikit-learn churn predictions, FAISS retrieval and LangGraph execution, with **no Gemini API calls**. See [the deployment guide](STREAMLIT_CLOUD.md). This does not enable the invite-only **live** option assessed below.
 
+Questions about capabilities or architecture and reactions to scope refusals also remain deterministic in the hosted demo. The local version uses validated Gemini intent classification for those cases, followed by short application-owned replies about implemented functions. A previous refusal-intent hint supplies limited continuity; it does not add general chat memory or affect tool permissions.
+
 ## Recommendation
 
 Share the hosted offline demo and complement it with a two- to three-minute recording of the full local application. The local version supports Gemini-powered routing, function calling and grounded generation, with [recorded live verification](../reports/gemini_portfolio_smoke.json). Its original API does not provide the access and global usage controls needed for an unattended public Gemini service. A recording lets a recruiter see real Gemini tool selection and evidence without consuming quota for every viewer.

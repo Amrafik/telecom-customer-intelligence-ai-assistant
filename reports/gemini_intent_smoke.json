@@ -1,0 +1,308 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "mode": "live",
+  "run_at": "2026-10-23T15:51:37.251391+03:00",
+  "model_availability": {
+    "model": "models/gemini-3.5-flash-lite",
+    "supported_actions": [
+      "generateContent",
+      "countTokens",
+      "createCachedContent",
+      "batchGenerateContent"
+    ]
+  },
+  "passed": 5,
+  "total": 5,
+  "cases": [
+    {
+      "id": "combined",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true,
+        "expected_policy_cited": true,
+        "expected_policy_fact_present": true,
+        "customer_source_equals_sql_join": true,
+        "score_equals_actual_pipeline": true,
+        "answer_displays_actual_score": true
+      },
+      "http_status": 200,
+      "latency_ms": 13025.158,
+      "request": {
+        "message": "Predict churn for CUST-001 and explain the cancellation policy."
+      },
+      "generate_content_calls": 5,
+      "response": {
+        "answer": "Customer intelligence:\nCUST-001 is Demo Customer A (fictional). Subscription: 12 months; tariff: pay_as_you_go; complaint recorded: yes; failed calls: 15.\n\nEstimated churn probability: 94.9%. Classification at threshold 0.50: churn. Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions. This score does not establish a cause of churn.\n\nFAQ guidance:\nTo cancel, request it through support or a DemoTel service store after identity verification, and pay any outstanding balance. An early termination fee may apply depending on the individual agreement, which support must check.",
+        "route": "both",
+        "intent": "both",
+        "mode": "live",
+        "sources": [
+          {
+            "source_id": "customer:CUST-001",
+            "title": "Fictional customer record",
+            "reference": "sqlite:customers+usage_metrics#CUST-001",
+            "excerpt": "{\"customer_id\": \"CUST-001\", \"display_name\": \"Demo Customer A\", \"fictional\": true, \"call_failures\": 15, \"complaints\": \"yes\", \"subscription_months\": 12, \"charge_band\": 1, \"seconds_of_use\": 650, \"calls\": 35, \"sms\": 5, \"distinct_called_numbers\": 12, \"tariff_plan\": \"pay_as_you_go\"}",
+            "score": null
+          },
+          {
+            "source_id": "model:uci563-rf-seed42-90d5fb6b",
+            "title": "Local churn model result",
+            "reference": "reports/benchmark.json",
+            "excerpt": "{\"customer_id\": \"CUST-001\", \"churn_probability\": 0.9493094876793147, \"predicted_churn\": true, \"threshold\": 0.5, \"model_version\": \"uci563-rf-seed42-90d5fb6b\", \"caveat\": \"Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions.\"}",
+            "score": null
+          },
+          {
+            "source_id": "faq:cancellation:0",
+            "title": "Cancellation and contract closure",
+            "reference": "data/faqs.json#cancellation",
+            "excerpt": "Fictional DemoTel policy: Request cancellation through support or a DemoTel service store after identity verification. Pay any outstanding balance. A contract may have an early termination fee; support must check the individual agreement. The assistant cannot cancel a line or calculate an individual termination fee.",
+            "score": 0.678722
+          }
+        ],
+        "tool_trace": [
+          {
+            "agent": "customer",
+            "tool": "get_customer",
+            "status": "success",
+            "code": null
+          },
+          {
+            "agent": "customer",
+            "tool": "predict_churn",
+            "status": "success",
+            "code": null
+          },
+          {
+            "agent": "knowledge",
+            "tool": "search_faqs",
+            "status": "success",
+            "code": null
+          }
+        ],
+        "errors": [],
+        "request_id": "945dde97-2998-43b0-ab8d-75148e43a261",
+        "latency_ms": 13012.155
+      },
+      "executed_tools": [
+        {
+          "agent": "customer",
+          "tool": "get_customer",
+          "result": {
+            "ok": true,
+            "data": {
+              "customer_id": "CUST-001",
+              "display_name": "Demo Customer A",
+              "fictional": true,
+              "call_failures": 15,
+              "complaints": "yes",
+              "subscription_months": 12,
+              "charge_band": 1,
+              "seconds_of_use": 650,
+              "calls": 35,
+              "sms": 5,
+              "distinct_called_numbers": 12,
+              "tariff_plan": "pay_as_you_go"
+            }
+          }
+        },
+        {
+          "agent": "customer",
+          "tool": "predict_churn",
+          "result": {
+            "ok": true,
+            "data": {
+              "customer_id": "CUST-001",
+              "churn_probability": 0.9493094876793147,
+              "predicted_churn": true,
+              "threshold": 0.5,
+              "model_version": "uci563-rf-seed42-90d5fb6b",
+              "caveat": "Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions."
+            }
+          }
+        },
+        {
+          "agent": "knowledge",
+          "tool": "search_faqs",
+          "result": {
+            "ok": true,
+            "data": [
+              {
+                "source_id": "faq:cancellation:0",
+                "title": "Cancellation and contract closure",
+                "reference": "data/faqs.json#cancellation",
+                "excerpt": "Fictional DemoTel policy: Request cancellation through support or a DemoTel service store after identity verification. Pay any outstanding balance. A contract may have an early termination fee; support must check the individual agreement. The assistant cannot cancel a line or calculate an individual termination fee.",
+                "score": 0.678722
+              },
+              {
+                "source_id": "faq:plan_change:0",
+                "title": "Changing a mobile plan",
+                "reference": "data/faqs.json#plan_change",
+                "excerpt": "Fictional DemoTel policy: Request a plan change in the app under My Plan or contact support. A change takes effect at the next billing cycle. Existing contractual commitments must be checked by support. No retention discount is guaranteed. The assistant can explain options but cannot modify a subscription.",
+                "score": 0.37699
+              },
+              {
+                "source_id": "faq:data:0",
+                "title": "Data allowance and usage alerts",
+                "reference": "data/faqs.json#data",
+                "excerpt": "Fictional DemoTel policy: Check remaining mobile data in the app under Usage. Usage alerts are sent at 80% and 100% of the bundle. Unused monthly data expires at the billing-cycle end; it does not roll over. When the allowance is exhausted, turn off mobile data or ask support about an",
+                "score": 0.366623
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "scope_unrelated",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "expected_intent": true,
+        "bounded_truthful_response": true,
+        "no_fabricated_sources": true,
+        "one_actual_classification": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true
+      },
+      "http_status": 200,
+      "latency_ms": 876.388,
+      "request": {
+        "message": "Write a chocolate cake recipe."
+      },
+      "generate_content_calls": 1,
+      "response": {
+        "answer": "That falls outside this telecom assistant's scope. I can help with telecom policies, demo customer profiles and churn estimates.",
+        "route": "clarify",
+        "intent": "out_of_scope",
+        "mode": "live",
+        "sources": [],
+        "tool_trace": [],
+        "errors": [],
+        "request_id": "974ad19a-c188-4fc0-ac52-c18b0cad289c",
+        "latency_ms": 873.634
+      },
+      "executed_tools": []
+    },
+    {
+      "id": "scope_followup",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "expected_intent": true,
+        "bounded_truthful_response": true,
+        "no_fabricated_sources": true,
+        "one_actual_classification": true,
+        "context_from_actual_prior_refusal": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true
+      },
+      "http_status": 200,
+      "latency_ms": 934.391,
+      "request": {
+        "message": "Why not?",
+        "previous_intent": "out_of_scope"
+      },
+      "generate_content_calls": 1,
+      "response": {
+        "answer": "I keep this assistant focused on telecom support and customer intelligence. Try a telecom question, or ask what I can do or how I work.",
+        "route": "clarify",
+        "intent": "refusal_followup",
+        "mode": "live",
+        "sources": [],
+        "tool_trace": [],
+        "errors": [],
+        "request_id": "b8f598e1-533d-4d1e-8a12-01679d74a48a",
+        "latency_ms": 931.971
+      },
+      "executed_tools": []
+    },
+    {
+      "id": "scope_capabilities",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "expected_intent": true,
+        "bounded_truthful_response": true,
+        "no_fabricated_sources": true,
+        "one_actual_classification": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true
+      },
+      "http_status": 200,
+      "latency_ms": 1751.075,
+      "request": {
+        "message": "What can you do?"
+      },
+      "generate_content_calls": 1,
+      "response": {
+        "answer": "I can explain the demo telecom FAQs, look up a fictional customer's profile and estimate churn risk. I can't browse the web, access real accounts or make account changes. In this local live session, Gemini classifies intent, selects validated tools and generates grounded FAQ answers.",
+        "route": "clarify",
+        "intent": "capabilities",
+        "mode": "live",
+        "sources": [],
+        "tool_trace": [],
+        "errors": [],
+        "request_id": "f8f38511-cab2-4434-bfcf-019181ee1613",
+        "latency_ms": 1748.251
+      },
+      "executed_tools": []
+    },
+    {
+      "id": "scope_architecture",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "expected_intent": true,
+        "bounded_truthful_response": true,
+        "no_fabricated_sources": true,
+        "one_actual_classification": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true
+      },
+      "http_status": 200,
+      "latency_ms": 803.742,
+      "request": {
+        "message": "How do you work?"
+      },
+      "generate_content_calls": 1,
+      "response": {
+        "answer": "Streamlit sends your question to FastAPI. LangGraph coordinates SQLite customer lookup, a saved Scikit-learn Random Forest for churn, and Sentence Transformers with FAISS for FAQ retrieval. In this local live session, Gemini classifies intent, selects validated tools and generates grounded FAQ answers.",
+        "route": "clarify",
+        "intent": "architecture",
+        "mode": "live",
+        "sources": [],
+        "tool_trace": [],
+        "errors": [],
+        "request_id": "94490b8e-0c4a-4004-9436-086ab6dcd367",
+        "latency_ms": 801.104
+      },
+      "executed_tools": []
+    }
+  ],
+  "generate_content_calls": 9,
+  "scope": "Actual Gemini requests, unchanged LangGraph, FastAPI and registry; evidence compared to executed FAISS search, SQLite JOIN and sklearn inference.",
+  "limitations": "Small smoke set; source identity and selected policy facts are checked, but this is not an exhaustive semantic entailment or security evaluation. Free-tier access and quotas are account-specific."
+}
