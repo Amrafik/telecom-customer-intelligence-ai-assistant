@@ -1,10 +1,12 @@
 # Final technical audit
 
-**Audit date: 23 October 2026, Africa/Cairo.** Existing source, tests, local database, saved pipeline, vector index and reports were inspected directly. The architecture was preserved. The verdict is about a bounded, local graduate portfolio demonstration; it is not a production, cloud-deployment or Egyptian population validation certificate.
+**Audit date: 23 October 2026, Africa/Cairo.** Existing source, tests, local database, saved pipeline, vector index and reports were inspected directly. The architecture was preserved. Historical verification runs are identified below; this documentation update corrects deployment status without rerunning or changing their results. This is a graduate portfolio assessment, not a production-readiness or Egyptian population validation certificate.
 
-**Decision:** ready for a graduate-level local technical demonstration, with the limitations below stated explicitly. All eight requested functional competencies are implemented and verified within that scope. Broader model validity, RAG quality and production readiness remain partial. Passing mocks/offline rules alone was not accepted as evidence of live agency.
+**Decision:** ready for a graduate-level demonstration of the hosted offline demo and full local application, with the limitations below stated explicitly. All eight requested functional competencies are implemented and verified within the full local application's scope. Broader model validity, RAG quality and production readiness remain partial. Passing mocks/offline rules alone was not accepted as evidence of live agency.
 
-**Latest portfolio pass:** 123 automated tests and 30 offline cases passed; see [portfolio verification](reports/portfolio_verification.json) and the follow-up at the end. Earlier audit and interactive-run counts below are historical snapshots. The limited portfolio Gemini smoke is separately recorded as 1/1.
+**Current deployment status:** the [public Streamlit demo](https://amrafik-telecom-ai.streamlit.app/) uses deterministic offline routing with actual SQLite lookups, Scikit-learn churn predictions, FAISS retrieval and LangGraph execution. It makes **no Gemini API calls**. The full local application supports Gemini-powered routing, function calling and grounded generation, with recorded live verification. The internal hosted FastAPI backend is not a separately public REST API.
+
+**Recorded verification:** the later cloud preparation passed 143 full Windows tests, 20 repeated Linux cloud tests and 30 offline cases; see [cloud preparation evidence](reports/cloud_preparation.json). The earlier 123-test portfolio pass is preserved in [portfolio verification](reports/portfolio_verification.json); its limited Gemini smoke is separately recorded as 1/1. These are distinct historical runs, not fresh results from this documentation cleanup. The requirement table retains the original functional audit evidence with deployment status updated below.
 
 ## Requirement assessment
 
@@ -13,8 +15,8 @@
 | 1. Autonomous AI agents | **PASS** | `telecom/workflow.py: Assistant._route/_run_tools`; `telecom/gemini_llm.py: structured/choose_tool`; live mode consumes actual Gemini route labels and function arguments. | Fresh `reports/gemini_live_audit.json`: mixed request chose `both` and executed lookup, prediction and search. `tests/test_gemini_contract.py` checks SDK contracts separately. | Bounded autonomy over three read-only tools, not arbitrary execution. Initial tool use is required and permissible actions/ordering are constrained by Python. Offline routing is explicitly rule-based and proves no model autonomy. |
 | 2. Multi-agent collaboration | **PASS** | `workflow.py: _customer_agent/_knowledge_agent`; `llm.py: agent_instructions`; `tools.py: ALLOWED`; customer findings are passed to knowledge planning through shared state. | Fresh mixed live case; `test_both_agents_share_and_combine_real_evidence`; Gemini contract test checks `other_agent_findings`. | Two specialisations using the same model in one process, sequentially. They are not independently trained models, distributed services or unrestricted peer conversations. |
 | 3. Multi-step orchestration | **PASS** | `workflow.py: State, Assistant.__init__, chat`; conditional `StateGraph` edges; `tools.py: ToolContext/ToolExecutor.execute`. | Graph routing/clarification/failure tests, input/allowlist/ID/dependency/duplicate/budget tests; fresh mixed live sequence. | Three customer planning steps, one knowledge step, default five total tool attempts, recursion limit 12, per-call timeout. No durable checkpoints, chat memory or overall request deadline. |
-| 4. REST APIs and application integration | **PASS** | `api.py: create_app/health/chat/customer/predict`; `schemas.py`; `ui.py: HTTP client and show_result`. | Full endpoint suite plus `tests/test_ui.py` actual loopback chat. `reports/final_runtime_smoke.json`: restarted servers, HTTP prediction/404/422/clarification and Streamlit render all passed. | Localhost demo with no authentication. Chat can return HTTP 200 with structured subtask errors; callers must inspect `errors`. Customer-ID binding is not user authorisation. |
-| 5. Model serving and basic monitoring | **PASS — local only** | `ml.py: Predictor.predict`; `workflow.py: cached Predictor/Retriever`; `monitoring.py: event`; `api.py: request_context`; `monitor.py: summary`. | Saved model inference and real HTTP prediction passed. Log correlation/timestamp/selection/failure tests passed. Monitoring command produced real request counts and latency percentiles. | **No public cloud deployment.** CPU model/embeddings are served by local FastAPI; Gemini text generation is remote. Logs include tests and historical failures, so their percentiles are not load-test or SLA results. Single-process local logger, no alerts/dashboard. |
+| 4. REST APIs and application integration | **PASS** | `api_factory.py: create_app/health/chat/customer/predict`; `schemas.py`; `ui.py: HTTP client and show_result`; `cloud_runtime.py: internal backend`. | Full endpoint suite plus `tests/test_ui.py` actual loopback chat. `reports/final_runtime_smoke.json`: restarted servers, HTTP prediction/404/422/clarification and Streamlit render all passed. Cloud tests cover internal authentication/readiness. | The original local API has no viewer authentication; the cloud API uses an internal token and loopback binding. Chat can return HTTP 200 with structured subtask errors; callers must inspect `errors`. Customer-ID binding is not user authorisation. |
+| 5. Model serving and basic monitoring | **PASS — local and hosted offline** | `ml.py: Predictor.predict`; `workflow.py: cached Predictor/Retriever`; `monitoring.py: event`; `api_factory.py: request_context`; `monitor.py: summary`; cloud runtime/resources and `deploy/streamlit/app.py`. | Saved inference, real HTTP prediction and log correlation/timestamp/selection/failure tests passed. `reports/cloud_preparation.json` records Linux startup/restart and shared-control checks. | Public Streamlit deployment serves the CPU model/embeddings through an internal FastAPI backend with zero Gemini calls. Remote Gemini generation belongs to local live mode. Logs include tests and historical failures; percentiles are not load-test/SLA results. Single-process logging, no alerts/dashboard. |
 | 6. Hyperparameter tuning and leakage prevention | **PASS** | `train.py: train/make_pipeline`; 8 configurations × grouped 3-fold CV; preprocessing inside Pipeline; train-only F1 refit. Group hashes keep identical retained predictors together. | `test_full_grid_search_reproduces_original_benchmark_in_temporary_output` reran the whole grid and matched original scores/selection. Fold/group separation and preprocessing tests passed. | Small fixed search, one seeded outer split, no nested CV or business-cost threshold optimisation. Hash grouping only establishes isolation for identical observed feature rows. |
 | 7. Reproducible ML benchmarks | **PASS** | `train.py: metrics/train`; `reports/benchmark.json`, `grid_search.csv`, `split.json`; saved `models/churn_pipeline.joblib`. Baseline and forest use the same holdout. | RF **and dummy baseline** metrics independently recomputed; seeded refit reproduced probabilities; data/bundle/provenance hashes agreed. Original model, CSV, split and reports remained byte-for-byte unchanged. | Test rows are excluded from fitting/tuning in the inspected code; this does not reconstruct an unavailable historical experiment trail. Scores apply to one public Iranian sample, not Vodafone/Egypt; uncalibrated, no causal or fairness claim. |
 | 8. Generative AI, RAG and function calling | **PASS** | `rag.py: chunks/build_index/Retriever.search`; local Sentence Transformer + exact FAISS cosine search; `llm.py: grounded_answer`; `gemini_llm.py: native_history/choose_tool`. | Actual mixed Gemini answer used retrieved cancellation evidence; actual Japan-price case returned uncertainty. Source/score equality checks, semantic retrieval tests, signature preservation and invalid-citation tests passed. | 8 fictional FAQs → 11 vectors, heuristic 0.35 threshold. Citation membership and selected fact checks are **not full semantic-entailment guarantees** or broad retrieval-quality evaluation. |
@@ -22,7 +24,7 @@
 | Artifact/source consistency and errors | **PASS** | `Predictor.__init__` rejects corrupt/incompatible bundles; `Retriever.__init__` checks hashes/config/dimensions and reconstructed FAQ chunks; safe `AppError` handling. | Corrupt model, altered manifest excerpt, missing/stale index and invalid stored-record tests passed. `reports/final_artifact_verification.json` records current checks. | Trusted local artifacts only. Joblib validation does not make malicious pickle safe. Cached resources require a restart after rebuilding. No cryptographic signing/provenance chain is claimed. |
 | Current secrets and Git ignore checks | **PASS — current files** | Gemini key remains in ignored `.env`, excluded from Settings repr; `.gitignore` covers secrets and generated artifacts; example credential blank. | Ignore checks and known-key/pattern scans of current tracked and staged content; latest evidence in `reports/portfolio_verification.json`. | Known-key/pattern scanning cannot prove absence of every possible secret. No full historical credential audit is claimed. |
 | Git repository / publication | **PASS — existing repository** | Existing `main` tracks `origin/main` at the public Amrafik repository. The portfolio pass preserves its parent tree and checks the remote head before publishing. | Fetch/head comparison and staged-content verification; publication uses a normal fast-forward with an expected-parent check. | This verifies the current snapshot and update, not every prior Git object. No force-push or unrelated-history rewrite is authorised. |
-| Population validity / production readiness | **PARTIAL** | Explicit caveats in Prediction, README and explanation; local-only bindings and fictional app data. | Public-data holdout and small application regression/live sets only. | No representative Egyptian/customer deployment test, calibration, fairness audit, causal study, auth, concurrency/load validation, cloud hosting or operational retention experiment. These do not block the scoped graduate demonstration. |
+| Population validity / production readiness | **PARTIAL** | Explicit caveats in Prediction, README and explanation; fictional app data, local loopback bindings and hosted offline controls. | Public-data holdout, small application regression/live sets and cloud startup/concurrency-control checks. | Public hosting exists, but does not establish representative Egyptian performance, calibration, fairness, causality, production load capacity, an SLA or operational retention outcomes. The local API lacks viewer authentication; offline cloud controls are not production access governance. These limits do not block the scoped graduate demonstration. |
 
 ## Actual numerical benchmark
 
@@ -35,7 +37,7 @@ UCI Iranian Churn: 3,150 rows, CC BY 4.0, seed 42; **2,515 training / 635 held-o
 
 These are real public-data results, not synthetic training results or a claim of “98% accuracy”. The synthetic app customers have no observed churn labels; their scores are illustrative inference only. The model version remains `uci563-rf-seed42-90d5fb6b`.
 
-## Cleanup performed
+## Historical cleanup — original audit
 
 - Removed the OpenAI implementation, SDK dependency, its unused `jiter` dependency, provider-selection configuration, old variables/timeouts, legacy health fields, obsolete tests and outdated failure/smoke reports. This sentence records the necessary cleanup context; active source, configuration, dependency files, scripts, tests and user guides no longer reference that provider.
 - Kept the existing LangGraph nodes/edges, tool registry, RAG, FAISS, SQLite schema, ML feature set/classifier and REST/UI architecture. `llm.py` retains useful task policies/schemas; Gemini is the only SDK transport.
@@ -44,13 +46,13 @@ These are real public-data results, not synthetic training results or a claim of
 - Retained essential no-evidence/authentication checks in Gemini tests while removing six obsolete provider-only tests. Added eleven audit checks: complete grid reproduction, baseline/hash reproduction, invalid models, SQL closure/data consistency, source substitution and Gemini safeguards. Final count: **88**, rather than the historical 83.
 - Corrected documentation to Gemini-only, guarded `.env` copying against overwrite, and replaced the unavailable Windows `py` launcher command with the verified `python` executable. Added module/function explanations, agent/tool/workflow distinctions, six question walkthroughs and telecom interview practice with limitations/alternatives.
 
-## Fresh verification results
+## Historical verification results — original audit
 
 | Check | Exact outcome | Evidence |
 |---|---|---|
 | Dependency compatibility | `No broken requirements found.` SDK being removed is absent from the environment. | `reports/final_command_checks.json`, audited lock file |
-| Complete pytest suite | **88 passed, 0 failures/errors/skips; 32.15 seconds; 4 upstream deprecation warnings** | `reports/pytest.xml` |
-| Offline evaluation | **22/22 passed**; real local components, deterministic decisions/excerpts, no Gemini calls | `reports/evaluation.json` |
+| Complete pytest suite | **88 passed, 0 failures/errors/skips; 32.15 seconds; 4 upstream deprecation warnings** | `reports/final_regression_summary.json` (original snapshot; JUnit has since been updated) |
+| Offline evaluation | **22/22 passed**; real local components, deterministic decisions/excerpts, no Gemini calls | `reports/final_regression_summary.json` (original snapshot; current case report contains 30) |
 | Fresh limited live Gemini | **2/2 passed** on `gemini-3.5-flash-lite` | `reports/gemini_live_audit.json` |
 | Restarted servers / UI smoke | **8/8 checks passed**: health, Gemini metadata, prediction, customer 404, bad-input 422, no-tool clarification, Streamlit HTTP and render | `reports/final_runtime_smoke.json` |
 | Model/index/data preservation | All 9 pre-audit artifact hashes unchanged; 100 fitted trees; model classes `[0,1]`; 11 FAISS vectors / 384 dimensions | `reports/pre_audit_artifact_hashes.json`, `final_artifact_verification.json` |
@@ -63,7 +65,7 @@ To respect quota, the fresh audit deliberately did not repeat all seven live sce
 
 The four non-failing suite warnings come from Starlette/AnyIO, LangGraph serialization and Uvicorn/websockets. The separate Streamlit render harness also emitted a non-failing missing-ScriptRunContext warning. Dependency compatibility checks passed; no clean new-machine Windows installation, vulnerability audit or alternate Python/OS verification is claimed.
 
-## Commands executed / reproducible checks
+## Historical commands / reproducible local checks
 
 From `C:\Users\amror\Desktop\Telecom AI Assistant`:
 
@@ -84,9 +86,9 @@ Use separate terminals for the current local app:
 .\.venv\Scripts\python.exe -m streamlit run telecom/ui.py --server.address 127.0.0.1 --server.port 8501 --browser.gatherUsageStats false
 ```
 
-The servers were restarted against the cleaned code and are available at localhost:8000 and localhost:8501. Do not start duplicate listeners on those ports. The consolidated evidence is `reports/final_regression_summary.json`.
+At the original audit, the servers were restarted and checked at localhost:8000 and localhost:8501. This records that run, not their current availability. Do not start duplicate listeners on those ports. The consolidated evidence is `reports/final_regression_summary.json`.
 
-## Demonstration recommendation
+## Historical demonstration recommendation — original audit
 
 The project is defensible for a graduate technical demonstration if presented as **a tested local integration of bounded Gemini agents, retrieval and tabular analytics**. Show the source, trace and evidence, not just chat text. Explain the mock/offline/live distinction, the real public-data benchmark and why its high AUC is not Egyptian operational validity. Review/stage the repository yourself before publishing, then continue using only fictional customer data unless appropriate data governance and evaluation are added.
 
@@ -97,16 +99,16 @@ Accurate CV bullets:
 - Implemented validated REST endpoints, bounded read-only tools and structured request monitoring; passed **88 automated tests** and **22 offline evaluation cases**, with separate opt-in live verification.
 
 
-## Interactive regression follow-up — 23 October 2026
+## Historical interactive regression follow-up — 23 October 2026
 
 Interactive use exposed a false clarification for `Show the profile for CUST-002.`. The record existed, and an unchanged live retry returned its SQL profile, indicating an intermittent model-routing error rather than a missing customer. The routing instructions now explicitly cover profile/details/usage lookups, distinguish intent from record or policy availability, and give labelled examples. Live routing and tool selection remain Gemini decisions; no deterministic live fallback was introduced.
 
-- Complete current suite: **91 passed**, four upstream warnings, **36.89 seconds**; `reports/pytest.xml` now reflects this later run. The earlier 88-test audit timing is preserved in `reports/final_regression_summary.json`.
+- Complete suite at that stage: **91 passed**, four upstream warnings, **36.89 seconds**. The JUnit file was subsequently updated by later runs; this paragraph preserves the historical result. The earlier 88-test audit timing is preserved in `reports/final_regression_summary.json`.
 - Fresh live prompt checks: **10/10**, including the standard seven scenarios, a lowercase-ID usage request, selected-customer context and a repeated exact profile question. Actual registry outputs were compared with source evidence.
 - Restarted localhost API: **2/2** additional live checks. The exact profile question executed `get_customer` and returned the joined SQL record. The Japan-price question executed `search_faqs` and returned uncertainty without unsupported citations. Request-correlated logs confirmed execution.
 - Detailed evidence: `reports/live_prompt_regression.json`. Earlier live reports and the ML benchmark are preserved. These limited samples do not prove general routing reliability or exhaustive semantic grounding.
 
-## Portfolio improvement follow-up — 23 October 2026
+## Historical portfolio improvement follow-up — 23 October 2026
 
 - Final complete suite: **123 passed, 0 failures/errors/skips, 36.47 seconds**, four upstream dependency warnings. Of these, 23 are marked simulated Gemini SDK contracts; they are not additional live tests.
 - Expanded offline catalogue: **30/30 passed**, with real SQL/model/vector operations and zero Gemini calls. Eight retrieval cases cover all FAQ topics. The new mixed and failure scenarios verify actual call order, trace, returned source excerpts and partial results.
@@ -117,12 +119,12 @@ Interactive use exposed a false clarification for `Show the profile for CUST-002
 - Four owner-supplied actual interface captures were saved byte-for-byte in `docs/assets/`. They show initial, churn, roaming and combined answers with evidence panels collapsed. README captions do not present them as expanded-trace evidence.
 - README and the project guide now distinguish benchmark, offline, mocked and live evidence; explain the extended cases and temporary-artifact test; and document the current sidebar labels. The removed portfolio footer remains absent.
 
-The consolidated evidence is [reports/portfolio_verification.json](reports/portfolio_verification.json). A securely restricted free public live demo is not verified: this API lacks authentication and shared usage controls, and the two-process app needs hosting validation. No deployment was made. The [demo assessment](docs/DEMO_OPTIONS.md) recommends a short recording of local interactions.
+The consolidated evidence is [reports/portfolio_verification.json](reports/portfolio_verification.json). At that stage, no deployment was made; the original local Gemini API lacked viewer authentication and shared usage controls. The subsequent offline wrapper and public deployment are described below. A short recording of local Gemini interactions complements the hosted offline demo; no public Gemini-powered deployment is claimed.
 
-## Offline cloud preparation follow-up
+## Historical offline cloud preparation follow-up
 
 A separate Streamlit Community Cloud entry point has been prepared locally, with a loopback FastAPI server, checksum-verified copy of the existing trained model, automatic isolated SQLite/FAISS cache initialization, and shared concurrency/minute/day guards. The local API now imports the same handlers from `api_factory.py`, avoiding local `.env` initialization in cloud imports. Default local launch behavior and the original UI, settings, workflow, tools, dependencies and artifacts are preserved.
 
 Fresh evidence: **143/143 full Windows tests**, **20/20 repeated cloud tests on Ubuntu Linux**, **30/30 offline cases**, **10/10 actual Linux cold-start/restart smoke checks**, and passing dependency checks on both systems. All cloud work is offline; zero Gemini calls were made. See [cloud preparation evidence](reports/cloud_preparation.json). The Linux cold-start peak was **681.5 MiB RSS**, so Community Cloud memory headroom remains unverified.
 
-This is **prepared configuration, not a deployed cloud service**. Privacy controls, invitations and actual platform capacity remain unverified. The offline wrapper cannot be switched to live mode using `.env`, environment variables or cloud secrets. The preparation was subsequently authorized for GitHub publication; no app deployment was performed. Exact steps and the access-control distinction are in [the deployment guide](docs/STREAMLIT_CLOUD.md).
+No app deployment was performed during that preparation run. The owner subsequently deployed the [public offline Streamlit demo](https://amrafik-telecom-ai.streamlit.app/). Long-term platform capacity remains unestablished; current public access does not imply private viewer authentication. The offline wrapper cannot be switched to live mode using `.env`, environment variables or cloud secrets. Exact steps and optional private sharing are in [the deployment guide](docs/STREAMLIT_CLOUD.md).

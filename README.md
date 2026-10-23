@@ -4,7 +4,9 @@
 
 **Telecom policy answers, customer lookup and churn prediction in one conversation.**
 
-A local telecom assistant that combines two LangGraph agents, Gemini function calling, FAQ retrieval and a trained churn model. It answers policy questions, retrieves customer profiles through SQLite and calculates churn risk with a saved Scikit-learn pipeline.
+A telecom assistant that combines two LangGraph agents, FAQ retrieval and a trained churn model. It answers policy questions, retrieves customer profiles through SQLite and calculates churn risk with a saved Scikit-learn pipeline.
+
+The **public hosted demo** uses deterministic offline routing and executes real SQLite lookups, Scikit-learn predictions, FAISS retrieval and LangGraph workflows, with **no Gemini API calls**. The **full local application** supports Gemini-powered agent routing, function calling and grounded response generation, with [recorded live verification](reports/gemini_portfolio_smoke.json).
 
 FastAPI exposes the tools and workflow; Streamlit presents the answer, sources and execution trace. A mixed question such as “Predict churn for CUST-001 and explain the cancellation policy” runs customer lookup, model inference and policy retrieval in sequence.
 
@@ -13,6 +15,8 @@ FastAPI exposes the tools and workflow; Streamlit presents the answer, sources a
 [Architecture](#architecture) · [Screenshots](#interface-screenshots) · [Model results](#model-results) · [Setup](#getting-started) · [Test evidence](#testing-and-verification) · [Project guide](PROJECT_EXPLAINED.md) · [Demo options](docs/DEMO_OPTIONS.md)
 
 ## Architecture
+
+The diagram shows the full local workflow. Its Gemini connections apply only to local live mode; the hosted demo uses deterministic routing and tool selection with the same graph and local tools.
 
 ```mermaid
 flowchart TD
@@ -48,13 +52,13 @@ flowchart TD
 
 The agents have different prompts, permissions and responsibilities. The Customer Intelligence Agent can call `get_customer` and `predict_churn`; the Knowledge Agent can call `search_faqs`. For mixed requests, customer findings enter shared graph state before the policy step. This is sequential collaboration inside one application.
 
-Gemini proposes function calls; the application validates and executes them. Safeguards include Pydantic schemas, tool allowlists, customer-ID matching, lookup before prediction, duplicate-call detection and a shared budget of five tool attempts. Customer planning is capped at three steps, knowledge search at one, and graph recursion at 12. SDK automatic function execution and automatic retries are disabled.
+In local live mode, Gemini proposes function calls; the application validates and executes them. Safeguards include Pydantic schemas, tool allowlists, customer-ID matching, lookup before prediction, duplicate-call detection and a shared budget of five tool attempts. Customer planning is capped at three steps, knowledge search at one, and graph recursion at 12. SDK automatic function execution and automatic retries are disabled.
 
 ### Retrieval and grounding
 
 Eight authored FAQs are split into 11 overlapping chunks of up to 50 words. A pinned `all-MiniLM-L6-v2` Sentence Transformer produces 384-dimensional embeddings. FAISS searches normalised vectors using inner products, equivalent to cosine similarity.
 
-The default search returns up to three results above a 0.35 similarity threshold. Gemini receives the retrieved excerpts and must cite retrieved source IDs. Missing evidence or an unsupported answer produces uncertainty. The threshold is a retrieval heuristic; valid citations alone do not prove that every generated sentence is supported.
+The default search returns up to three results above a 0.35 similarity threshold. In local live mode, Gemini receives the retrieved excerpts and must cite retrieved source IDs. Missing evidence or an unsupported answer produces uncertainty. The hosted offline demo returns retrieved excerpts rather than generated answers. The threshold is a retrieval heuristic; valid citations alone do not prove that every generated sentence is supported.
 
 ## What it does
 
@@ -123,7 +127,7 @@ The response combines customer analytics with cancellation guidance. **Agent wor
 | Layer | Implementation |
 |---|---|
 | Language | Python 3.11–3.12; verified on Windows with Python 3.12.9 |
-| LLM | Gemini `gemini-3.5-flash-lite` through official `google-genai` 2.33.0 |
+| LLM (local live mode only) | Gemini `gemini-3.5-flash-lite` through official `google-genai` 2.33.0 |
 | Orchestration | LangGraph 1.0.3 |
 | API and validation | FastAPI 0.121.3, Uvicorn, Pydantic 2.12.5 |
 | Interface | Streamlit 1.51.0 |
@@ -131,7 +135,7 @@ The response combines customer analytics with cancellation guidance. **Agent wor
 | Retrieval | Sentence Transformers 5.1.2, CPU PyTorch and FAISS 1.12.0 |
 | Storage and tests | Python `sqlite3`, Pytest and HTTPX |
 
-Direct dependencies are pinned in [requirements.txt](requirements.txt); [requirements-lock.txt](requirements-lock.txt) records the audited environment. Python 3.13+ is outside the supported range. Python 3.11 and other operating systems have not been verified.
+Direct dependencies are pinned in [requirements.txt](requirements.txt); [requirements-lock.txt](requirements-lock.txt) records the audited environment. Python 3.13+ is outside the supported range. Python 3.11 has not been verified; separate Ubuntu Linux cloud checks are documented below.
 
 ## Getting started
 
@@ -203,7 +207,7 @@ In a second terminal, start the interface:
 
 Open the [chat interface](http://127.0.0.1:8501), [interactive API documentation](http://127.0.0.1:8000/docs) or [health endpoint](http://127.0.0.1:8000/health). First use may take several seconds while local resources load. Stop each server with Ctrl+C.
 
-This is an unauthenticated local demonstration. Keep both services bound to `127.0.0.1`.
+These commands run the original local application without authentication. Keep both services bound to `127.0.0.1`.
 
 ## REST API
 
@@ -242,7 +246,7 @@ Recorded checks on **23 October 2026**:
 | Limited real Gemini smoke check | **1 / 1** | Actual mixed-agent request, observed tool execution and source/score comparison. [Live report](reports/gemini_portfolio_smoke.json). |
 | Earlier interactive live checks | **10 / 10 + 2 / 2 HTTP checks** | Preserved earlier run; not rerun in full for this pass. [Earlier evidence](reports/live_prompt_regression.json). |
 
-The automated suite blocks external sockets and uses simulated responses for Gemini SDK contracts. Its remaining tests exercise local components, including deliberate failure injection; some tests replace dependencies to isolate error handling. No default test calls the live provider. The 23 mocked-SDK cases are a subset of the 123 tests, not an additional test run. Saved live reports check tool execution against SQL rows, pipeline output and retrieved evidence. They are small smoke tests, not an exhaustive answer-quality or security evaluation. The latest automated run also reported four upstream deprecation warnings.
+The automated suite blocks external sockets and uses simulated responses for Gemini SDK contracts. Its remaining tests exercise local components, including deliberate failure injection; some tests replace dependencies to isolate error handling. No default test calls the live provider. The 23 mocked-SDK cases are included in the 143 tests, not an additional test run. Saved live reports check tool execution against SQL rows, pipeline output and retrieved evidence. They are small smoke tests, not an exhaustive answer-quality or security evaluation. The latest automated run also reported four upstream deprecation warnings.
 
 The 30-case catalogue covers all eight FAQ topics, unsupported input, customer lookup, repeated predictions, tool permissions/dependencies/budgets and multi-agent partial results. The missing-model case points the real loader at an absent temporary file; it does not remove the working model or invent an error response. Offline excerpts are not a semantic answerability test: a document can be relevant without containing the requested price.
 
@@ -301,7 +305,7 @@ For a demonstration, start with roaming retrieval, then customer lookup, then th
 
 ## Limitations
 
-- Local serving only: no public cloud deployment, authentication, production load testing or real support/billing integration.
+- The public hosted demo is offline-only; Gemini-powered functionality is available locally. Neither variant has production load-test/SLA evidence or real support/billing integration. The original local API has no viewer authentication.
 - Six fictional customers and eight English FAQs provide a small demonstration, without chat memory or broad telecom-policy coverage.
 - Public-data benchmarks do not establish local-market generalisation, probability calibration, fairness or business value.
 - Retrieval similarity and citation validation reduce some errors; neither guarantees factual entailment or resistance to every prompt injection.
@@ -310,9 +314,9 @@ For a demonstration, start with roaming retrieval, then customer lookup, then th
 
 ## Sharing the project
 
-Cloud preparation passed **20/20 cloud tests on Linux**, a **10/10 real Linux cold-start smoke**, and dependency checks. Peak measured Linux RSS was **681.5 MiB**, so actual hosted capacity is still a trial gate. [Verification and limitations](reports/cloud_preparation.json).
+Before deployment, cloud preparation passed **20/20 cloud tests on Linux**, a **10/10 real Linux cold-start smoke**, and dependency checks. Peak measured Linux RSS was **681.5 MiB**; this is a Linux test measurement, not a Community Cloud memory or load benchmark. Long-term hosted capacity and availability remain unestablished. [Verification and limitations](reports/cloud_preparation.json).
 
-A separate **offline private-cloud trial** is provided in `deploy/streamlit/app.py`. It starts an internal FastAPI backend, verifies the packaged trained model, initializes cloud SQLite/FAISS resources and enforces shared request limits. It ignores local `.env` credentials and cannot enable Gemini. See [exact deployment steps](docs/STREAMLIT_CLOUD.md). The owner has supplied a screenshot of the hosted app; private sharing and resource capacity still need owner verification.
+The **public offline demo** is deployed at [amrafik-telecom-ai.streamlit.app](https://amrafik-telecom-ai.streamlit.app/) using `deploy/streamlit/app.py`. It starts an internal FastAPI backend, verifies the packaged trained model, initializes cloud SQLite/FAISS resources and enforces shared request limits. It ignores local `.env` credentials and cannot enable Gemini. See [deployment details and optional private sharing](docs/STREAMLIT_CLOUD.md).
 
 A short recording of the local Gemini version complements the offline hosted demo. The original local API has no viewer authentication or shared usage cap; the cloud wrapper adds its own offline-only controls. A hidden Gemini key alone would not prevent visitors from consuming quota through an unrestricted live endpoint.
 

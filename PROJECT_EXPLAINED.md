@@ -2,6 +2,8 @@
 
 This guide is written for someone who can read basic Python but is still learning machine learning, RAG and agents. Read it alongside the code, then use the demonstration near the end to practise for an interview. The [README](README.md) contains the installation and launch commands.
 
+The [public hosted demo](https://amrafik-telecom-ai.streamlit.app/) uses deterministic offline routing with actual SQLite lookups, Scikit-learn churn predictions, FAISS retrieval and LangGraph execution. It makes no Gemini API calls. The full local application supports Gemini-powered routing, function calling and grounded response generation; [recorded live checks](reports/gemini_portfolio_smoke.json) verify selected real interactions. The live-mode walkthroughs below describe that local version, not the hosted demo.
+
 ## 1. What problem does this project solve?
 
 A telecom support or analytics user may need two different kinds of information:
@@ -444,7 +446,7 @@ The health endpoint checks local resources and reports Gemini, its model and whe
 
 The displayed chat history is a UI convenience, limited to recent messages. That history is not submitted to the graph as conversational memory. Questions remain independent; “What about this customer?” without an ID or selected customer may need clarification.
 
-Keeping UI and backend separate demonstrates an API boundary and lets a different client reuse the same prediction service. This remains a local demo, not a production microservice architecture.
+Keeping UI and backend separate demonstrates an API boundary and lets a different client reuse the same prediction service. The local application runs these as separate processes; the hosted offline wrapper starts an internal backend in the Streamlit process. Neither arrangement is a production microservice architecture.
 
 ## 10. Monitoring and evaluation
 
@@ -590,19 +592,19 @@ These are practice questions relevant to this project, not a claim to know Vodaf
 
 **What if Gemini requests a cancellation or another customer's ID?** No cancellation tool is registered. The allowlist blocks unknown actions, input validation rejects malformed arguments, and selected-ID binding rejects a different customer. These are enforced in Python, not only requested in the prompt. The ID binding is still not real authentication.
 
-**Where is the model deployed?** A local FastAPI process loads the saved sklearn pipeline and embeddings on CPU. Gemini is a remote text service. The API itself is not hosted publicly and there is no cloud deployment, SLA or load-test claim.
+**Where is the model deployed?** The public Streamlit Community Cloud demo loads the saved sklearn pipeline and embeddings on CPU through its internal FastAPI backend. That backend is not a separately public REST service. The original local application also serves the model through FastAPI; only its live mode calls the remote Gemini service. Public hosting does not establish an SLA, production load capacity or suitability for Egyptian customers.
 
 **What would you improve next if this became a real service?** Start with lawful representative data and clear access/privacy requirements, then broader evaluation, authentication, calibrated risk scores and operational reliability. Adding infrastructure before those requirements would not fix model or data validity.
 
 ## 16. Sharing the project without an unrestricted public API
 
-The [demo assessment](docs/DEMO_OPTIONS.md) recommends a short local recording. Keeping a Gemini key on the server protects the credential from the browser, but anyone able to invoke an unauthenticated `/chat` endpoint could still consume quota. The existing five-attempt tool budget limits one request, not the number of requests, global concurrency or daily spending. A UI password alone would not protect a separately exposed API.
+The [demo assessment](docs/DEMO_OPTIONS.md) recommends sharing the public offline demo, complemented by a short recording of the local Gemini version. Keeping a Gemini key on the server protects the credential from the browser, but anyone able to invoke the original local application's unauthenticated `/chat` endpoint could still consume quota if it were exposed. Its five-attempt tool budget limits one request, not global concurrency or daily spending. A UI password alone would not protect a separately exposed API.
 
-A public offline version could avoid Gemini usage, but hosting both processes and rebuilding the local artifacts would still need testing. A restricted live deployment would need access controls and shared usage limits first. Neither has been deployed or verified here. The scope remains a manageable local graduate project.
+The deployed public offline wrapper avoids Gemini usage, starts its own internal backend and adds shared request controls. Linux startup, artifact initialization and restart checks are recorded separately from the local live tests. A restricted Gemini-powered deployment would still need a separate access-control and quota review; no public live Gemini deployment is claimed. The scope remains a manageable graduate portfolio project.
 
 The four README screenshots were supplied by the project owner from the working application and saved unchanged. Their source and workflow panels are closed. They illustrate the interface and visible answers; the machine-readable reports and regression tests provide separate execution evidence. No recording has been created as part of this pass.
 
-## 17. The optional offline cloud wrapper
+## 17. The hosted offline cloud wrapper
 
 `deploy/streamlit/app.py` is separate from the original local UI. It sets CPU thread limits before importing the numerical stack and asks `cloud_runtime.get_runtime()` for one process-wide backend. Streamlit also caches that object across reruns. `CloudRuntime.ensure_started()` serializes startup, binds a random loopback port, starts Uvicorn in a background thread and waits for a real `/health` response. Repeated startup calls reuse the server; restarting a stopped server reuses the loaded assistant. The cloud backend uses the same API handlers in `api_factory.py`.
 
@@ -610,10 +612,10 @@ The four README screenshots were supplied by the project owner from the working 
 
 `prepare_assistant()` creates a separate cloud database and vector cache under `.cache/cloud`. Missing resources are rebuilt from fictional seeds, FAQ text and the pinned public embedding model. The builder returns its embedder so the retriever can reuse it. Subsequent requests share the loaded model/index; a complete process restart must load them again. Existing local artifacts and benchmark files are not rewritten.
 
-`UsageLimiter` uses a lock to admit one business request at a time, a rolling in-memory window for six requests per minute, and a SQLite transaction for one hundred requests per UTC day. Failed admitted requests count too. Health checks are exempt but still require the internal server token. The token travels only in the server-side HTTP client; Community Cloud's private sharing setting authenticates viewers. Neither the token nor the limiter makes an unrestricted public live Gemini service safe. Daily counts survive ordinary backend restarts, but can disappear with ephemeral storage.
+`UsageLimiter` uses a lock to admit one business request at a time, a rolling in-memory window for six requests per minute, and a SQLite transaction for one hundred requests per UTC day. Failed admitted requests count too. Health checks are exempt but still require the internal server token. The token travels only in the server-side HTTP client and is not a viewer login. The current demo is public; Community Cloud can optionally restrict viewer access through its sharing settings. Neither the token nor the limiter makes an unrestricted public live Gemini service safe. Daily counts survive ordinary backend restarts, but can disappear with ephemeral storage.
 
 This cloud path is intentionally offline-only and has no Gemini charges. It demonstrates the real graph, SQL JOIN, trained classifier, retrieval and REST boundary with deterministic decisions/excerpts. The original local live app remains the place to demonstrate Gemini routing and generation. Consult [the deployment guide](docs/STREAMLIT_CLOUD.md) for exact steps and current verification limits.
 
-Cloud preparation then expanded the complete Windows suite to **143 passing tests** in **44.80 seconds**, including twenty cloud-specific tests. All twenty also passed on Ubuntu WSL / Python 3.12.3, and a separate real Linux cold-start smoke passed ten checks with a fresh embedding download and FAISS build. These repeated executions are not additional distinct scenarios. `reports/cloud_preparation.json` links the exact evidence. The Linux smoke peaked at 681.5 MiB RSS, leaving uncertain headroom at Community Cloud's lowest published allocation; a hosted trial remains necessary. No Gemini calls or deployment occurred.
+**Historical predeployment verification:** cloud preparation expanded the complete Windows suite to **143 passing tests** in **44.80 seconds**, including twenty cloud-specific tests. All twenty also passed on Ubuntu WSL / Python 3.12.3, and a separate real Linux cold-start smoke passed ten checks with a fresh embedding download and FAISS build. These repeated executions are not additional distinct scenarios. `reports/cloud_preparation.json` links the exact evidence. The Linux smoke peaked at 681.5 MiB RSS; this does not establish Community Cloud memory headroom or long-term availability. No Gemini calls or deployment occurred during that preparation run. The owner subsequently deployed the public offline demo linked above.
 
 The publication rerun also isolated pytest logs from the development log and other processes. The autouse `isolated_logs` fixture redirects only the monitoring module's root during a test, closes its temporary handlers afterward and restores previous handlers. The logging test still parses every generated line and checks request IDs, choices and failures. This prevents unrelated historical log content from deciding whether a fresh test passes, without adding production multi-process logging.
