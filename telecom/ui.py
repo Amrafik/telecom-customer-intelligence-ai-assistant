@@ -19,25 +19,27 @@ def backend_health(url):
 
 
 with st.sidebar:
-    st.subheader("Demo settings")
-    selected = st.selectbox("Fictional customer (optional)", [None] + [f"CUST-{n:03d}" for n in range(1, 7)],
-                            format_func=lambda item: item or "No customer selected")
+    st.subheader("Customer workspace")
+    selected = st.selectbox("Customer", [None] + [f"CUST-{n:03d}" for n in range(1, 7)],
+                            format_func=lambda item: item or "Select a customer (optional)")
     health = backend_health(settings.backend_url)
     if health:
-        st.write(f"Backend: {health['status']}")
-        st.write(f"Mode: {health['mode']}")
-        st.write("Provider: Gemini")
+        service_status = "Available" if health["status"] == "ready" else "Limited availability"
+        mode_label = "AI-assisted" if health["mode"] == "live" else "Offline"
+        st.write(f"Service: {service_status}")
+        st.write(f"Mode: {mode_label}")
         if health["mode"] == "offline":
-            st.info("Offline mode uses routing rules and retrieved excerpts. It makes no LLM provider calls.")
+            st.info("Offline mode uses local customer data and FAQ excerpts, without AI-generated answers.")
         else:
-            st.info("Live mode uses Gemini for routing, tool selection and grounded FAQ answers.")
+            st.info("Ask about plans, billing and roaming, or review a customer's churn risk.")
     else:
-        st.warning("Start the FastAPI backend to chat.")
-    st.caption("Examples: How do I activate roaming? · Predict churn for CUST-001 · Predict churn for CUST-001 and explain cancellation.")
-    if st.button("Clear conversation"):
+        st.warning("The service is currently unavailable. Please try again shortly.")
+    st.markdown("**Try asking**")
+    st.markdown("- How do I activate roaming?\n- Predict churn for CUST-001.\n- Explain the cancellation policy.")
+    if st.button("Clear chat"):
         st.session_state.messages = []
         st.rerun()
-    st.caption("Each question is independent. Select or include a customer ID. No account changes are performed.")
+    st.caption("For customer questions, select a customer above or include an ID in each message.")
 
 
 def show_result(result):
@@ -70,12 +72,12 @@ for message in st.session_state.messages:
         else:
             st.markdown(message["content"])
 
-if prompt := st.chat_input("Ask about telecom policies or a fictional customer's churn"):
+if prompt := st.chat_input("Ask about plans, billing or customer churn…"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
     with st.chat_message("assistant"):
-        with st.spinner("Checking sources and customer tools…"):
+        with st.spinner("Preparing your answer…"):
             try:
                 response = httpx.post(f"{settings.backend_url}/chat",
                                       json={"message": prompt, "customer_id": selected}, timeout=240)
@@ -84,7 +86,7 @@ if prompt := st.chat_input("Ask about telecom policies or a fictional customer's
                 show_result(result)
                 st.session_state.messages.append({"role": "assistant", "result": result})
             except httpx.HTTPStatusError:
-                st.error("The backend could not complete this request. Check its health and local logs.")
+                st.error("We couldn't complete your request. Please try again.")
             except (httpx.HTTPError, ValueError):
-                st.error("The backend is unavailable or timed out. Start FastAPI and try again.")
+                st.error("The service is unavailable or taking too long to respond. Please try again shortly.")
     st.session_state.messages = st.session_state.messages[-20:]

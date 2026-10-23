@@ -2,26 +2,13 @@
 
 **Telecom policy answers, customer lookup and churn prediction in one conversation.**
 
-A support question often needs more than a policy search. “Predict churn for CUST-001 and explain the cancellation policy” requires a customer record, a trained model and the right policy evidence. This project connects those steps through two specialised LangGraph agents, with Gemini selecting tools and Python controlling their execution.
+A local telecom assistant that combines two LangGraph agents, Gemini function calling, FAQ retrieval and a trained churn model. It answers policy questions, retrieves customer profiles through SQLite and calculates churn risk with a saved Scikit-learn pipeline.
 
-The application runs locally with a FastAPI backend and a Streamlit chat interface. Answers include sources and a tool trace, so a reviewer can inspect what actually happened.
+FastAPI exposes the tools and workflow; Streamlit presents the answer, sources and execution trace. A mixed question such as “Predict churn for CUST-001 and explain the cancellation policy” runs customer lookup, model inference and policy retrieval in sequence.
 
 **Independent portfolio project.** No Vodafone affiliation or private Vodafone data. The six demonstration customers and eight DemoTel FAQs are fictional; the churn model is trained on a public, anonymised dataset.
 
-[Getting started](#getting-started) · [Architecture](#architecture) · [Model results](#model-results) · [Testing](#testing-and-verification) · [Project guide](PROJECT_EXPLAINED.md) · [Technical audit](FINAL_TECHNICAL_AUDIT.md)
-
-## What it does
-
-| Ask the assistant | What runs behind the answer |
-|---|---|
-| “How do I activate international roaming?” | The Knowledge Agent searches local FAQ vectors and generates an answer grounded in retrieved excerpts. |
-| “Show the profile for CUST-002.” | The Customer Intelligence Agent retrieves a profile through a parameterised SQLite JOIN. |
-| “Predict churn for CUST-001.” | Customer lookup runs first, followed by inference with the saved Scikit-learn pipeline. |
-| “Predict churn for CUST-001 and explain the cancellation policy.” | Both agents run in sequence and combine customer findings with cited policy guidance. |
-| “What is the exact DemoTel roaming price in Japan?” | The assistant should express uncertainty because the FAQ does not contain that price. |
-| “Predict churn for CUST-999.” | Customer lookup reports a missing record; no prediction or customer evidence is invented. |
-
-Tools are read-only. The assistant cannot change accounts, cancel a service or apply an offer.
+[Architecture](#architecture) · [Screenshots](#interface-screenshots) · [Model results](#model-results) · [Setup](#getting-started) · [Test evidence](#testing-and-verification) · [Project guide](PROJECT_EXPLAINED.md) · [Demo options](docs/DEMO_OPTIONS.md)
 
 ## Architecture
 
@@ -67,6 +54,19 @@ Eight authored FAQs are split into 11 overlapping chunks of up to 50 words. A pi
 
 The default search returns up to three results above a 0.35 similarity threshold. Gemini receives the retrieved excerpts and must cite retrieved source IDs. Missing evidence or an unsupported answer produces uncertainty. The threshold is a retrieval heuristic; valid citations alone do not prove that every generated sentence is supported.
 
+## What it does
+
+| Ask the assistant | What runs behind the answer |
+|---|---|
+| “How do I activate international roaming?” | The Knowledge Agent searches local FAQ vectors and generates an answer grounded in retrieved excerpts. |
+| “Show the profile for CUST-002.” | The Customer Intelligence Agent retrieves a profile through a parameterised SQLite JOIN. |
+| “Predict churn for CUST-001.” | Customer lookup runs first, followed by inference with the saved Scikit-learn pipeline. |
+| “Predict churn for CUST-001 and explain the cancellation policy.” | Both agents run in sequence and combine customer findings with cited policy guidance. |
+| “What is the exact DemoTel roaming price in Japan?” | The assistant should express uncertainty because the FAQ does not contain that price. |
+| “Predict churn for CUST-999.” | Customer lookup reports a missing record; no prediction or customer evidence is invented. |
+
+Tools are read-only. The assistant cannot change accounts, cancel a service or apply an offer.
+
 ## Model results
 
 The churn model uses the [UCI Iranian Churn dataset](https://archive.ics.uci.edu/dataset/563/iranian+churn+dataset): 3,150 anonymised records under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Features cover the first nine months; the churn label is measured at month twelve. Attribution, the source checksum and the feature dictionary are in [data/README.md](data/README.md) and [data/provenance.json](data/provenance.json).
@@ -87,6 +87,34 @@ Identical feature rows stay in the same group during both the outer split and cr
 Reproducibility records: [benchmark metrics](reports/benchmark.json), [grid-search results](reports/grid_search.csv) and [split indices](reports/split.json). The chart is generated directly from the benchmark by [scripts/render_benchmarks.py](scripts/render_benchmarks.py), using Matplotlib as an optional documentation dependency in a separate environment.
 
 These results describe this public Iranian sample. They do not establish performance for Egypt, Vodafone customers or the fictional application records. Probabilities are uncalibrated and have not been validated for operational decisions.
+
+## Interface screenshots
+
+Real captures supplied by the project owner from the local live-mode application. The image files are preserved without edits. The source and workflow panels are collapsed in these captures; executed-tool and grounding checks are recorded separately in the evaluation reports.
+
+### Customer workspace
+
+![Local Streamlit interface with customer selection and service status](docs/assets/app-overview.png)
+
+The customer selector is optional when the question already includes a customer ID.
+
+### Churn prediction
+
+![Actual CUST-001 churn prediction displayed in the chat interface](docs/assets/churn-prediction.png)
+
+The saved pipeline calculates an illustrative 94.9% score for this fictional customer; the answer includes its dataset limitations.
+
+### RAG policy answer
+
+![Actual Knowledge Agent answer about international roaming](docs/assets/rag-roaming-answer.png)
+
+A roaming question is answered from the fictional FAQ collection. In the running app, expand **Sources and evidence** to inspect the retrieved excerpts.
+
+### Both agents in one request
+
+![Actual combined churn prediction and cancellation-policy answer](docs/assets/combined-agent-answer.png)
+
+The response combines customer analytics with cancellation guidance. **Agent workflow** exposes the underlying tool trace; the supplied capture shows that panel closed.
 
 ## Technology stack
 
@@ -206,19 +234,20 @@ Recorded checks on **23 October 2026**:
 
 | Check | Result | Scope and evidence |
 |---|---:|---|
-| Automated tests | **91 passed** | API, SQL JOIN, ML training/inference, retrieval, graph routing, tool validation, Gemini SDK contracts and Streamlit integration. [JUnit report](reports/pytest.xml). |
-| Offline evaluation | **22 / 22** | Actual local tools and deterministic orchestration; no live LLM decisions. [Evaluation report](reports/evaluation.json). |
-| Interactive live prompt regression | **10 / 10 + 2 / 2 HTTP checks** | Core scenarios, profile wording variations and repeated lookup; the restarted API also checked the exact profile and Japan-price questions. [Prompt regression report](reports/live_prompt_regression.json). |
-| Limited live Gemini audit | **2 / 2** | Mixed-agent request and unsupported-price uncertainty, with executed tools and sources checked. [Live audit](reports/gemini_live_audit.json). |
-| Local runtime smoke checks | **8 / 8** | Running API/UI readiness, prediction, validation and error handling. [Runtime report](reports/final_runtime_smoke.json). |
-| Earlier full live Gemini suite | **7 / 7** | FAQ, lookup, prediction, mixed request and failure cases. This run predates the final cleanup. [Historical live report](reports/gemini_live_evaluation.json). |
+| Automated suite | **123 passed** | Local regression and simulated-provider integration, including the 30 evaluation cases. [JUnit report](reports/pytest.xml). |
+| Offline evaluation | **30 / 30** | Real SQL, inference, vector retrieval and rule-based orchestration; zero Gemini calls. [Case report](reports/evaluation.json). |
+| Mocked Gemini SDK contracts | **23 / 23**, included in the 123 | Simulated HTTP responses exercise the official SDK and real local tools; they do not prove live decisions. [Verification summary](reports/portfolio_verification.json). |
+| Limited real Gemini smoke check | **1 / 1** | Actual mixed-agent request, observed tool execution and source/score comparison. [Live report](reports/gemini_portfolio_smoke.json). |
+| Earlier interactive live checks | **10 / 10 + 2 / 2 HTTP checks** | Preserved earlier run; not rerun in full for this pass. [Earlier evidence](reports/live_prompt_regression.json). |
 
-The automated suite blocks external sockets and simulates Gemini responses; it makes no paid API calls. Those tests validate integration contracts, not live model behaviour. Saved live reports check tool execution against SQL rows, pipeline output and retrieved evidence. They are small smoke tests, not an exhaustive answer-quality or security evaluation. The latest automated run also reported four upstream deprecation warnings.
+The automated suite blocks external sockets and uses simulated responses for Gemini SDK contracts. Its remaining tests exercise local components, including deliberate failure injection; some tests replace dependencies to isolate error handling. No default test calls the live provider. The 23 mocked-SDK cases are a subset of the 123 tests, not an additional test run. Saved live reports check tool execution against SQL rows, pipeline output and retrieved evidence. They are small smoke tests, not an exhaustive answer-quality or security evaluation. The latest automated run also reported four upstream deprecation warnings.
 
-Live checks are opt-in and consume API quota. Run the smaller check first:
+The 30-case catalogue covers all eight FAQ topics, unsupported input, customer lookup, repeated predictions, tool permissions/dependencies/budgets and multi-agent partial results. The missing-model case points the real loader at an absent temporary file; it does not remove the working model or invent an error response. Offline excerpts are not a semantic answerability test: a document can be relevant without containing the requested price.
+
+Live checks are opt-in and consume API quota. This pass retained a single completed mixed-agent smoke report to limit usage. An earlier two-case attempt was interrupted before its report was written; it is not counted as a completed two-case run. Earlier live reports remain unchanged. To reproduce the small completed check:
 
 ```powershell
-.\.venv\Scripts\python.exe -m telecom.evaluate_gemini --case combined --case unsupported_price
+.\.venv\Scripts\python.exe -m telecom.evaluate_gemini --case combined --output reports/gemini_portfolio_smoke.json
 ```
 
 To run all seven live scenarios:
@@ -227,7 +256,7 @@ To run all seven live scenarios:
 .\.venv\Scripts\python.exe -m telecom.evaluate --live
 ```
 
-Live cases pause for 15 seconds between requests. A full run replaces the full live report; selected cases write the limited audit report. The [technical audit](FINAL_TECHNICAL_AUDIT.md) explains the checks, their timing and their limits.
+Live cases pause for 15 seconds between scenarios, and each scenario can make several Gemini requests. `--output` chooses a separate report path. Without it, a full run replaces the full live report and selected cases replace the limited audit report. The [technical audit](FINAL_TECHNICAL_AUDIT.md) explains the checks, their timing and their limits.
 
 ## Monitoring and safeguards
 
@@ -259,8 +288,9 @@ telecom/
 data/                          Public training CSV, provenance, fictional seeds
 reports/                       Benchmarks, splits and recorded verification
 tests/                         Automated regression tests
-docs/assets/                   Benchmark visual
+docs/assets/                   Real interface screenshots and benchmark chart
 scripts/render_benchmarks.py   Rebuild the chart from saved metrics
+docs/DEMO_OPTIONS.md            Public-demo assessment and recording outline
 PROJECT_EXPLAINED.md            Code walkthrough and interview questions
 FINAL_TECHNICAL_AUDIT.md         Requirement-by-requirement assessment
 ```
@@ -275,6 +305,12 @@ For a demonstration, start with roaming retrieval, then customer lookup, then th
 - Retrieval similarity and citation validation reduce some errors; neither guarantees factual entailment or resistance to every prompt injection.
 - Gemini availability and API quotas can change. Send only fictional demo data; review the provider's data-use terms before using another dataset.
 - Joblib artifacts must come from a trusted source. Validation does not make untrusted pickle files safe to load.
+
+## Sharing the project
+
+A short local recording is the recommended recruiter demo. The current API has no authentication or shared usage cap, and hosting only the Streamlit entry point would not start FastAPI. Keeping the Gemini key server-side protects the credential but does not stop visitors from repeatedly invoking the service.
+
+An offline public demo could avoid Gemini calls, but hosting both services and validating free-host resources would still require work. No deployment was performed. See the sourced [demo assessment and recording outline](docs/DEMO_OPTIONS.md) for the options and limits.
 
 ## License and attribution
 

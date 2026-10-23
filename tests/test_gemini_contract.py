@@ -17,6 +17,8 @@ from telecom.schemas import ChatRequest, Source
 from telecom.tools import tool_spec
 from telecom.workflow import Assistant
 
+pytestmark = pytest.mark.mocked_llm
+
 
 def payload(parts):
     return {"candidates": [{"content": {"role": "model", "parts": parts}, "finishReason": "STOP"}]}

@@ -18,4 +18,5 @@ include = ["telecom*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
-markers = ["integration: requires locally built model and semantic index"]
+markers = ["integration: requires locally built model and semantic index",
+           "mocked_llm: Gemini SDK contracts with simulated responses; no live provider calls"]

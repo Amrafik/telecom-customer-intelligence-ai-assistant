@@ -1,24 +1,265 @@
 [
-  {"id":"retrieval_roaming","kind":"retrieval","question":"How do I activate roaming before travelling abroad?","expected":"faq:roaming:"},
-  {"id":"retrieval_billing","kind":"retrieval","question":"How can I dispute an unexpected bill charge?","expected":"faq:billing:"},
-  {"id":"retrieval_cancellation","kind":"retrieval","question":"How do I cancel my contract?","expected":"faq:cancellation:"},
-  {"id":"retrieval_plans","kind":"retrieval","question":"How much is Flex Plus per month?","expected":"faq:plans:"},
-  {"id":"retrieval_no_evidence","kind":"retrieval_miss","question":"What is the capital of Mars?"},
-  {"id":"route_knowledge","kind":"route","question":"How do I activate roaming?","expected":"knowledge"},
-  {"id":"route_customer","kind":"route","question":"Predict churn for CUST-001","expected":"customer"},
-  {"id":"route_both","kind":"route","question":"Predict churn for CUST-001 and explain the cancellation policy","expected":"both"},
-  {"id":"route_clarify","kind":"route","question":"Write a recipe for a chocolate cake","expected":"clarify"},
-  {"id":"sql_join_lookup","kind":"lookup","customer_id":"CUST-001","expected_calls":35},
-  {"id":"unknown_customer","kind":"unknown_customer","customer_id":"CUST-999"},
-  {"id":"prediction_repeatability","kind":"prediction","customer_id":"CUST-001"},
-  {"id":"combined_graph","kind":"combined","question":"Predict churn for CUST-001 and explain the cancellation policy"},
-  {"id":"missing_id_clarification","kind":"clarification","question":"Predict customer churn"},
-  {"id":"conflicting_id_clarification","kind":"conflicting_ids","question":"Predict churn for CUST-002"},
-  {"id":"empty_message_rejected","kind":"bad_request","body":{"message":"   "}},
-  {"id":"sql_injection_rejected","kind":"bad_predict","body":{"customer_id":"CUST-001' OR 1=1 --"}},
-  {"id":"prediction_requires_lookup","kind":"lookup_required"},
-  {"id":"duplicate_call_blocked","kind":"duplicate_call"},
-  {"id":"tool_budget_enforced","kind":"tool_budget"},
-  {"id":"tool_id_bound_to_user","kind":"wrong_id"},
-  {"id":"agent_tool_allowlist","kind":"wrong_tool"}
+  {
+    "id": "retrieval_roaming",
+    "kind": "retrieval",
+    "question": "How do I activate roaming before travelling abroad?",
+    "expected": "faq:roaming:"
+  },
+  {
+    "id": "retrieval_billing",
+    "kind": "retrieval",
+    "question": "How can I dispute an unexpected bill charge?",
+    "expected": "faq:billing:"
+  },
+  {
+    "id": "retrieval_cancellation",
+    "kind": "retrieval",
+    "question": "How do I cancel my contract?",
+    "expected": "faq:cancellation:"
+  },
+  {
+    "id": "retrieval_plans",
+    "kind": "retrieval",
+    "question": "How much is Flex Plus per month?",
+    "expected": "faq:plans:"
+  },
+  {
+    "id": "retrieval_no_evidence",
+    "kind": "retrieval_miss",
+    "question": "What is the capital of Mars?"
+  },
+  {
+    "id": "route_knowledge",
+    "kind": "route",
+    "question": "How do I activate roaming?",
+    "expected": "knowledge",
+    "expected_tools": [
+      "search_faqs"
+    ],
+    "expected_source_types": [
+      "faq"
+    ]
+  },
+  {
+    "id": "route_customer",
+    "kind": "route",
+    "question": "Predict churn for CUST-001",
+    "expected": "customer",
+    "expected_tools": [
+      "get_customer",
+      "predict_churn"
+    ],
+    "expected_source_types": [
+      "customer",
+      "model"
+    ]
+  },
+  {
+    "id": "route_both",
+    "kind": "route",
+    "question": "Predict churn for CUST-001 and explain the cancellation policy",
+    "expected": "both",
+    "expected_tools": [
+      "get_customer",
+      "predict_churn",
+      "search_faqs"
+    ],
+    "expected_source_types": [
+      "customer",
+      "model",
+      "faq"
+    ]
+  },
+  {
+    "id": "route_clarify",
+    "kind": "route",
+    "question": "Write a recipe for a chocolate cake",
+    "expected": "clarify",
+    "expected_tools": [],
+    "expected_source_types": []
+  },
+  {
+    "id": "sql_join_lookup",
+    "kind": "lookup",
+    "customer_id": "CUST-001",
+    "expected_calls": 35,
+    "expected_name": "Demo Customer A"
+  },
+  {
+    "id": "unknown_customer",
+    "kind": "unknown_customer",
+    "customer_id": "CUST-999"
+  },
+  {
+    "id": "prediction_repeatability",
+    "kind": "prediction",
+    "customer_id": "CUST-001"
+  },
+  {
+    "id": "combined_graph",
+    "kind": "combined",
+    "question": "Predict churn for CUST-001 and explain the cancellation policy",
+    "expected": "both",
+    "expected_tools": [
+      "get_customer",
+      "predict_churn",
+      "search_faqs"
+    ],
+    "expected_source_types": [
+      "customer",
+      "model",
+      "faq"
+    ],
+    "expected_faq": "cancellation"
+  },
+  {
+    "id": "missing_id_clarification",
+    "kind": "clarification",
+    "question": "Predict customer churn",
+    "expected": "clarify",
+    "expected_tools": [],
+    "expected_source_types": []
+  },
+  {
+    "id": "conflicting_id_clarification",
+    "kind": "conflicting_ids",
+    "question": "Predict churn for CUST-002",
+    "expected": "clarify",
+    "expected_tools": [],
+    "expected_source_types": [],
+    "selected_customer_id": "CUST-001"
+  },
+  {
+    "id": "empty_message_rejected",
+    "kind": "bad_request",
+    "body": {
+      "message": "   "
+    }
+  },
+  {
+    "id": "sql_injection_rejected",
+    "kind": "bad_predict",
+    "body": {
+      "customer_id": "CUST-001' OR 1=1 --"
+    }
+  },
+  {
+    "id": "prediction_requires_lookup",
+    "kind": "lookup_required"
+  },
+  {
+    "id": "duplicate_call_blocked",
+    "kind": "duplicate_call"
+  },
+  {
+    "id": "tool_budget_enforced",
+    "kind": "tool_budget"
+  },
+  {
+    "id": "tool_id_bound_to_user",
+    "kind": "wrong_id"
+  },
+  {
+    "id": "agent_tool_allowlist",
+    "kind": "wrong_tool"
+  },
+  {
+    "id": "retrieval_payment",
+    "kind": "retrieval",
+    "question": "When is my bill payment due and where can I pay?",
+    "expected": "faq:payment:"
+  },
+  {
+    "id": "retrieval_support",
+    "kind": "retrieval",
+    "question": "What time does in-app customer support open and close?",
+    "expected": "faq:support:"
+  },
+  {
+    "id": "retrieval_data_alerts",
+    "kind": "retrieval",
+    "question": "At what percentages will data allowance usage alerts be sent?",
+    "expected": "faq:data:"
+  },
+  {
+    "id": "retrieval_plan_change",
+    "kind": "retrieval",
+    "question": "When does a requested mobile plan change take effect?",
+    "expected": "faq:plan_change:"
+  },
+  {
+    "id": "profile_lookup_only",
+    "kind": "chat",
+    "question": "Show the profile for CUST-002.",
+    "expected": "customer",
+    "expected_tools": [
+      "get_customer"
+    ],
+    "expected_source_types": [
+      "customer"
+    ],
+    "expected_customer_id": "CUST-002"
+  },
+  {
+    "id": "combined_profile_plan",
+    "kind": "chat",
+    "question": "Show CUST-002 profile and explain when a mobile plan change takes effect.",
+    "expected": "both",
+    "expected_tools": [
+      "get_customer",
+      "search_faqs"
+    ],
+    "expected_source_types": [
+      "customer",
+      "faq"
+    ],
+    "expected_customer_id": "CUST-002",
+    "expected_faq": "plan_change"
+  },
+  {
+    "id": "combined_missing_customer_policy",
+    "kind": "chat",
+    "question": "Predict churn for CUST-999 and explain the cancellation policy.",
+    "expected": "both",
+    "expected_tools": [
+      "get_customer",
+      "search_faqs"
+    ],
+    "expected_statuses": [
+      "error",
+      "success"
+    ],
+    "expected_errors": [
+      "customer_not_found"
+    ],
+    "expected_source_types": [
+      "faq"
+    ],
+    "expected_faq": "cancellation"
+  },
+  {
+    "id": "missing_model_partial_result",
+    "kind": "missing_model",
+    "question": "Predict churn for CUST-001 and explain the cancellation policy.",
+    "expected": "both",
+    "expected_tools": [
+      "get_customer",
+      "predict_churn",
+      "search_faqs"
+    ],
+    "expected_statuses": [
+      "success",
+      "error",
+      "success"
+    ],
+    "expected_errors": [
+      "model_unavailable"
+    ],
+    "expected_source_types": [
+      "customer",
+      "faq"
+    ],
+    "expected_customer_id": "CUST-001",
+    "expected_faq": "cancellation"
+  }
 ]

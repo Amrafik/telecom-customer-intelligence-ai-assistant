@@ -96,7 +96,7 @@ Source files, FAQ/seed data and reports belong in a portfolio repository. Large/
 | `api.py` | `create_app()`: four routes, middleware, safe errors and readiness checks. |
 | `ui.py` | Streamlit chat, optional customer selector, HTTP requests and evidence rendering. |
 | `monitoring.py`, `monitor.py` | Correlated JSON events and observed request-latency summaries. |
-| `evaluate.py` | `check_case()`, `evaluate_offline()`: 22 deterministic regression cases; `--live` explicitly calls Gemini verification. |
+| `evaluate.py` | `check_chat()`, `check_case()`, `evaluate_offline()`: 30 deterministic regression cases; observed tool executions are checked against returned evidence. `--live` explicitly calls Gemini verification. |
 | `evaluate_gemini.py` | Opt-in live cases and `evidence_checks()` comparison against actual tool results. |
 
 `__init__.py` files identify Python packages; they do not contain application behavior. Packaging and test settings live in `pyproject.toml`, with direct and locked dependencies in the two requirements files.
@@ -440,7 +440,7 @@ The health endpoint checks local resources and reports Gemini, its model and whe
 
 ### 9.2 Streamlit responsibilities
 
-`ui.py` is an HTTP client. It never opens SQLite or loads the ML model. The sidebar lets a user choose a fictional customer and see the backend mode. The chat sends JSON to FastAPI using `httpx` and shows answers, source excerpts and the tool trace.
+`ui.py` is an HTTP client. It never opens SQLite or loads the ML model. The sidebar lets a user choose a fictional customer and see service readiness and the backend mode. “AI-assisted” corresponds to live mode and “Offline” to deterministic local mode; changing display labels does not change `APP_MODE`. The chat sends JSON to FastAPI using `httpx` and shows answers, source excerpts and the tool trace.
 
 The displayed chat history is a UI convenience, limited to recent messages. That history is not submitted to the graph as conversational memory. Questions remain independent; “What about this customer?” without an ID or selected customer may need clarification.
 
@@ -454,14 +454,18 @@ Raw customer records, questions and API keys are omitted from logs. Logs rotate 
 
 These statistics include development and deliberately failing tests. A high failure count after testing can be expected, and a latency percentile from those requests is not a production performance benchmark. Cold embedding/model loading also makes initial requests slower than warmed requests.
 
-`data/evaluation_cases.json` defines 22 transparent regression cases. `evaluate_offline()` runs them against real local components and saves individual results in `reports/evaluation.json`. All **22/22 passed** during development. Cases cover retrieval, routes, SQL records, prediction consistency, combined workflows, unknown IDs, invalid input, lookup dependencies, duplicate calls, budgets and tool permissions.
+`data/evaluation_cases.json` defines **30 regression cases**, all passing in the final run. `evaluate_offline()` runs real SQL, model inference, vector search, LangGraph and REST operations, with deterministic routing and extractive answers. It saves each result and its scope in `reports/evaluation.json`; it makes zero Gemini calls. Retrieval cases span all eight FAQ topics. Other cases check profile-only lookup, prediction consistency, mixed profile/policy and prediction/policy requests, unknown IDs, conflicting IDs, invalid requests, unsupported topics, lookup dependencies, duplicate calls, exhausted budgets and disallowed tools.
+
+`check_chat()` temporarily observes the actual tool executor. It compares route, call order, success/error status, trace and source types with the case specification. The shared `evidence_checks()` also compares returned customer evidence with the SQL JOIN, probabilities with the fitted pipeline, and citations with the retrieved excerpts. These checks are stronger than checking whether an answer contains a keyword, but do not establish that every possible generated sentence is supported.
+
+The missing-model case creates an isolated `Assistant` and points its tool executor's predictor factory at a genuinely absent file inside a temporary directory. `Predictor(path)` then raises the normal `model_unavailable` error. Customer lookup and cancellation retrieval must still succeed; no model source may appear. The working model is never deleted. An earlier evaluator setup incorrectly supplied a factory where the `Assistant` constructor expected a loaded predictor; correcting that setup fixed the case without changing the application architecture.
 
 Keep these evaluation categories distinct:
 
 | Evaluation | What it measures | What it does not prove |
 |---|---|---|
 | Held-out ML benchmark | Classification performance on public-data holdout. | Egypt/Vodafone/general deployment performance. |
-| Offline regression cases | Expected application behavior on 22 cases. | Live LLM decision or answer quality. |
+| Offline regression cases | Expected application behavior on 30 cases. | Live LLM decision or answer quality. |
 | Automated SDK contract tests | Integration with simulated provider payloads. | Successful real provider responses. |
 | Optional live smoke checks | Small provider-backed workflow checks. | Robustness across all user questions. |
 
@@ -473,9 +477,13 @@ The executed command was:
 .\.venv\Scripts\python.exe -m pytest -q --junitxml=reports/pytest.xml
 ```
 
-The post-cleanup result is **88 passed in 32.15 seconds**, with four upstream deprecation warnings and no failed tests. Obsolete provider-only tests were removed; new audit tests check full tuning reproduction, baseline metrics, corrupted artifacts, SQLite closure and saved data consistency.
+The final regression result is **123 passed in 36.47 seconds**, with four upstream deprecation warnings and no failed or skipped tests. The JUnit evidence is `reports/pytest.xml`. Of these tests, **23** are explicitly marked `mocked_llm`: they simulate Google SDK responses to test the provider contract. They are a subset of 123, not an additional run or proof of live Gemini behavior. Other tests exercise local components and deliberately inject some failures.
 
-A later interactive regression expanded the suite to **91 passing tests**. Three SDK-contract cases check profile-only lookup with an explicit ID, a lowercase ID and a selected customer; mocked responses test wiring and actual SQL execution, not live classification quality. Separate real Gemini checks passed **10/10**, with another **2/2** checks against the restarted HTTP server. Their questions, actual tool outputs, SQL/model comparisons and limitations are saved in `reports/live_prompt_regression.json`. These small checks do not guarantee that the model will classify every future question correctly.
+The 30 catalogue cases run both through the standalone evaluation command and as parameterized pytest checks. Those are two executions of the same cases, not 60 distinct scenarios. The catalogue test also checks unique IDs and coverage of all eight FAQ topics. A separate test rejects unknown evaluation kinds.
+
+One completed, real Gemini mixed-agent smoke passed **1/1** during this portfolio pass, before the final UI wording and documentation edits. `reports/gemini_portfolio_smoke.json` records the three actual tool executions and SQL/model/source comparisons. The workflow, prompts and model were unchanged after that run, so it was not repeated solely for documentation. A previously interrupted two-case attempt has no completed report and is not counted as a completed evaluation. Earlier seven-case and interactive live reports remain historical evidence; they are not fresh results from the final offline run.
+
+Use `python -m telecom.evaluate_gemini --case combined --output reports/gemini_portfolio_smoke.json` to request a small live recheck deliberately. One scenario involves several model calls for routing, tools and generation. `--output` lets you preserve earlier reports; without it, a selected run replaces `gemini_live_audit.json` and a full run replaces `gemini_live_evaluation.json`. Default pytest never calls Gemini.
 
 | File | Important behavior checked |
 |---|---|
@@ -486,7 +494,8 @@ A later interactive regression expanded the suite to **91 passing tests**. Three
 | `test_api.py` | Real endpoint behavior, input validation, sources/headers, correlated logs, 404/503 errors. |
 | `test_gemini_contract.py` | Google SDK requests, native history/signatures, one-call enforcement, lazy Gemini construction, errors, timeouts and no retries. |
 | `test_gemini_evaluation.py` | Live-check validator rejects changed source excerpts and invented model probabilities, without calling a live provider. |
-| `test_ui.py` | Streamlit renders and sends a chat to a real FastAPI server on an ephemeral loopback port. |
+| `test_ui.py` | Streamlit sends two questions to a real loopback FastAPI server, rerenders history and clears the chat. |
+| `test_evaluation.py` | All 30 catalogue scenarios, unique IDs, eight-topic coverage and unknown-kind rejection (32 tests). |
 
 The autouse fixture blocks external socket connections and puts embedding libraries into offline mode. Local loopback connections and mock transports remain allowed. Thus tests require the previously built local model/index/database, but no paid key or external service.
 
@@ -509,7 +518,7 @@ Do not claim that an agent autonomously made a model decision while demonstratin
 
 ### Six concrete question walkthroughs
 
-These examples correspond to the saved real seven-case Gemini run and the current local regression behavior. The limited final live audit rechecks mixed retrieval/prediction and uncertainty; it does not rerun every historical example.
+These examples describe the implementation and saved live evidence, including earlier seven-case and interactive runs. The limited portfolio smoke rechecks only mixed retrieval/prediction; it does not rerun every historical example.
 
 **1. “How do I activate international roaming?”** The live router selects `knowledge`. The Knowledge Agent proposes `search_faqs` with a focused query. Local embeddings and FAISS return `faq:roaming:0`. Gemini explains enabling roaming in the app, confirming coverage and activating a bundle before use. The source ID is checked before the API returns it. In offline mode the UI shows the retrieved excerpt instead of claiming generated reasoning.
 
@@ -584,3 +593,11 @@ These are practice questions relevant to this project, not a claim to know Vodaf
 **Where is the model deployed?** A local FastAPI process loads the saved sklearn pipeline and embeddings on CPU. Gemini is a remote text service. The API itself is not hosted publicly and there is no cloud deployment, SLA or load-test claim.
 
 **What would you improve next if this became a real service?** Start with lawful representative data and clear access/privacy requirements, then broader evaluation, authentication, calibrated risk scores and operational reliability. Adding infrastructure before those requirements would not fix model or data validity.
+
+## 16. Sharing the project without an unrestricted public API
+
+The [demo assessment](docs/DEMO_OPTIONS.md) recommends a short local recording. Keeping a Gemini key on the server protects the credential from the browser, but anyone able to invoke an unauthenticated `/chat` endpoint could still consume quota. The existing five-attempt tool budget limits one request, not the number of requests, global concurrency or daily spending. A UI password alone would not protect a separately exposed API.
+
+A public offline version could avoid Gemini usage, but hosting both processes and rebuilding the local artifacts would still need testing. A restricted live deployment would need access controls and shared usage limits first. Neither has been deployed or verified here. The scope remains a manageable local graduate project.
+
+The four README screenshots were supplied by the project owner from the working application and saved unchanged. Their source and workflow panels are closed. They illustrate the interface and visible answers; the machine-readable reports and regression tests provide separate execution evidence. No recording has been created as part of this pass.

@@ -1,0 +1,151 @@
+{
+  "run_at": "2026-10-23T13:03:59.915607+03:00",
+  "environment": {
+    "python": "3.12.9",
+    "os": "Windows"
+  },
+  "pytest": {
+    "tests": 123,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 36.465,
+    "timestamp": "2026-10-23T13:00:07.137244+03:00",
+    "upstream_warnings": 4,
+    "external_network_blocked_by_test_fixture": true
+  },
+  "mocked_gemini_contract_subset": {
+    "passed": 23,
+    "included_in_pytest_total": true,
+    "live_calls": 0
+  },
+  "offline": {
+    "run_at": "2026-10-23T13:02:39.631596+03:00",
+    "mode": "offline",
+    "passed": 30,
+    "total": 30,
+    "report": "reports/evaluation.json",
+    "provider_calls": 0
+  },
+  "completed_limited_live": {
+    "run_at": "2026-10-23T12:40:55.339117+03:00",
+    "mode": "live",
+    "passed": 1,
+    "total": 1,
+    "report": "reports/gemini_portfolio_smoke.json",
+    "model": "gemini-3.5-flash-lite",
+    "case_ids": [
+      "combined"
+    ],
+    "scope": "Completed before final UI wording/documentation edits; application workflow, prompts and model unchanged.",
+    "not_counted": "Earlier interrupted two-case attempt had no completed report."
+  },
+  "dependencies": {
+    "pip_check": "No broken requirements found."
+  },
+  "original_artifacts_unchanged": {
+    "data/raw/customer_churn.csv": true,
+    "data/customers.json": true,
+    "data/customers.sqlite3": true,
+    "models/churn_pipeline.joblib": true,
+    "reports/benchmark.json": true,
+    "reports/split.json": true,
+    "reports/grid_search.csv": true,
+    "artifacts/index/faqs.faiss": true,
+    "artifacts/index/metadata.json": true
+  },
+  "sqlite": {
+    "integrity": "ok",
+    "foreign_key_errors": [],
+    "profiles": 6,
+    "usage_rows": 6,
+    "joined_rows": 6,
+    "all_records_equal_seed": true
+  },
+  "runtime_smoke": {
+    "checks": {
+      "api_ready": true,
+      "customer_equals_sql_join": true,
+      "prediction_equals_pipeline": true,
+      "unknown_customer_404": true,
+      "invalid_prediction_422": true,
+      "streamlit_http_200": true,
+      "streamlit_health_ok": true
+    },
+    "passed": 7,
+    "total": 7,
+    "gemini_calls": 0,
+    "ui_interaction_scope": "HTTP readiness here; Streamlit AppTest in full pytest sends two chats through a real loopback FastAPI server."
+  },
+  "screenshots": [
+    {
+      "path": "docs/assets/app-overview.png",
+      "description": "Initial customer workspace",
+      "width": 1910,
+      "height": 882,
+      "sha256": "244697caa8d9325b6ea0680c87c53786b89f7f8d9067154754407049db6e0c5a",
+      "provenance": "User-supplied local live-mode screenshot, copied byte-for-byte without edits."
+    },
+    {
+      "path": "docs/assets/churn-prediction.png",
+      "description": "Customer churn prediction",
+      "width": 1906,
+      "height": 897,
+      "sha256": "b72feef104349f771e453819740f8cdf9b3d3cb12c645b2acd84b6b75be80787",
+      "provenance": "User-supplied local live-mode screenshot, copied byte-for-byte without edits."
+    },
+    {
+      "path": "docs/assets/rag-roaming-answer.png",
+      "description": "Roaming FAQ answer",
+      "width": 1903,
+      "height": 902,
+      "sha256": "9768a2d3c8e37f32ee6df568bc8fa99858c85698cdc47a3fb1abacbccd0f3c03",
+      "provenance": "User-supplied local live-mode screenshot, copied byte-for-byte without edits."
+    },
+    {
+      "path": "docs/assets/combined-agent-answer.png",
+      "description": "Combined customer and policy answer",
+      "width": 1900,
+      "height": 901,
+      "sha256": "4a5f39c1eca558fb9bd5737b1798dca586040a4a79b8b383d3fefe20a0d1aa86",
+      "provenance": "User-supplied local live-mode screenshot, copied byte-for-byte without edits."
+    }
+  ],
+  "screenshots_scope": "Four user-supplied real application captures, copied unchanged. Evidence/workflow panels are closed.",
+  "ignored_sensitive_or_generated_paths": {
+    ".env": true,
+    ".venv/pyvenv.cfg": true,
+    ".cache/screenshot_manifest.json": true,
+    "models/churn_pipeline.joblib": true,
+    "data/customers.sqlite3": true,
+    "logs/app.jsonl": true,
+    "artifacts/index/faqs.faiss": true
+  },
+  "documentation": {
+    "documented_modules_resolve": [
+      "prepare_data",
+      "init_db",
+      "train",
+      "build_index",
+      "api",
+      "ui",
+      "evaluate",
+      "evaluate_gemini",
+      "monitor"
+    ],
+    "fresh_machine_install": "Not repeated; current Windows environment verified.",
+    "public_deployment": "Not deployed; short local recording recommended in docs/DEMO_OPTIONS.md.",
+    "local_links_checked": 29,
+    "missing_local_links": []
+  },
+  "publication_checks": {
+    "branch": "main",
+    "expected_parent_sha": "2f00bb0631f26cf26f1e9e2895bc45c39ab235b0",
+    "staged_files": 19,
+    "current_tracked_and_staged_blobs_scanned": 72,
+    "actual_local_secret_values_and_common_key_patterns": "No findings",
+    "env_ignored_and_untracked": true,
+    "example_key_blank": true,
+    "scope": "Current tracked/staged snapshot; not a full historical secret audit."
+  }
+}

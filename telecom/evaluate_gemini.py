@@ -3,6 +3,7 @@ import argparse
 import json
 import time
 from datetime import datetime
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from fastapi.testclient import TestClient
@@ -55,7 +56,7 @@ def evidence_checks(body: dict, executed: list[dict], assistant: Assistant, case
 
 
 def evaluate_gemini(settings: Settings | None = None, *, spacing_seconds: float = 15,
-                    case_ids: list[str] | None = None):
+                    case_ids: list[str] | None = None, output_path: Path | None = None):
     settings = settings or Settings(app_mode="live")
     if settings.app_mode != "live":
         raise ValueError("This command requires live Gemini settings.")
@@ -119,7 +120,9 @@ def evaluate_gemini(settings: Settings | None = None, *, spacing_seconds: float 
               "limitations": "Small smoke set; source identity and selected policy facts are checked, but this is not an exhaustive semantic entailment or security evaluation. Free-tier access and quotas are account-specific."}
     (ROOT / "reports").mkdir(exist_ok=True)
     filename = "gemini_live_audit.json" if case_ids else "gemini_live_evaluation.json"
-    (ROOT / "reports" / filename).write_text(json.dumps(report, indent=2), encoding="utf-8")
+    destination = output_path or ROOT / "reports" / filename
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"Live Gemini: {report['passed']}/{report['total']} passed; report saved.")
     return report
 
@@ -128,5 +131,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Opt-in live Gemini verification (uses API quota).")
     parser.add_argument("--case", dest="case_ids", action="append", choices=[case[0] for case in CASES],
                         help="Run only the named case; repeat for a minimal quota-conscious audit.")
-    result = evaluate_gemini(case_ids=parser.parse_args().case_ids)
+    parser.add_argument("--output", type=Path, help="Save a separate report without replacing earlier live evidence.")
+    arguments = parser.parse_args()
+    result = evaluate_gemini(case_ids=arguments.case_ids, output_path=arguments.output)
     raise SystemExit(0 if result["passed"] == result["total"] else 1)

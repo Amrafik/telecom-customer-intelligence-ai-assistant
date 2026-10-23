@@ -1,9 +1,31 @@
 {
   "mode": "offline",
-  "run_at": "2026-10-23T11:25:58.233991+03:00",
-  "scope": "Real SQL, sklearn inference, FAISS retrieval, LangGraph and REST; rule-based routing and extractive answers; no Gemini calls.",
-  "passed": 22,
-  "total": 22,
+  "run_at": "2026-10-23T13:02:39.631596+03:00",
+  "scope": "Real SQL, sklearn inference, FAISS retrieval, LangGraph and REST; rule-based routing and extractive answers. One real missing-artifact fault injection; no mocked model outputs or Gemini calls.",
+  "provider_calls": 0,
+  "case_set_version": 2,
+  "case_kinds": {
+    "retrieval": 8,
+    "retrieval_miss": 1,
+    "route": 4,
+    "lookup": 1,
+    "unknown_customer": 1,
+    "prediction": 1,
+    "combined": 1,
+    "clarification": 1,
+    "conflicting_ids": 1,
+    "bad_request": 1,
+    "bad_predict": 1,
+    "lookup_required": 1,
+    "duplicate_call": 1,
+    "tool_budget": 1,
+    "wrong_id": 1,
+    "wrong_tool": 1,
+    "chat": 3,
+    "missing_model": 1
+  },
+  "passed": 30,
+  "total": 30,
   "cases": [
     {
       "id": "retrieval_roaming",
@@ -11,9 +33,14 @@
       "detail": {
         "source_ids": [
           "faq:roaming:0"
+        ],
+        "scores": [
+          0.621255
         ]
       },
-      "latency_ms": 9401.917
+      "kind": "retrieval",
+      "mode": "offline",
+      "latency_ms": 9823.883
     },
     {
       "id": "retrieval_billing",
@@ -23,9 +50,16 @@
           "faq:billing:0",
           "faq:payment:0",
           "faq:payment:1"
+        ],
+        "scores": [
+          0.511929,
+          0.424901,
+          0.408648
         ]
       },
-      "latency_ms": 9.426
+      "kind": "retrieval",
+      "mode": "offline",
+      "latency_ms": 9.023
     },
     {
       "id": "retrieval_cancellation",
@@ -33,9 +67,14 @@
       "detail": {
         "source_ids": [
           "faq:cancellation:0"
+        ],
+        "scores": [
+          0.578072
         ]
       },
-      "latency_ms": 9.593
+      "kind": "retrieval",
+      "mode": "offline",
+      "latency_ms": 6.904
     },
     {
       "id": "retrieval_plans",
@@ -44,51 +83,158 @@
         "source_ids": [
           "faq:plans:0",
           "faq:plans:1"
+        ],
+        "scores": [
+          0.63688,
+          0.408664
         ]
       },
-      "latency_ms": 9.758
+      "kind": "retrieval",
+      "mode": "offline",
+      "latency_ms": 8.593
     },
     {
       "id": "retrieval_no_evidence",
       "passed": true,
-      "detail": {},
-      "latency_ms": 9.129
+      "detail": {
+        "source_ids": []
+      },
+      "kind": "retrieval_miss",
+      "mode": "offline",
+      "latency_ms": 7.661
     },
     {
       "id": "route_knowledge",
       "passed": true,
-      "detail": {},
-      "latency_ms": 20.214
+      "detail": {
+        "route": "knowledge",
+        "tools": [
+          "search_faqs"
+        ],
+        "tool_statuses": [
+          "success"
+        ],
+        "error_codes": [],
+        "source_ids": [
+          "faq:roaming:0"
+        ],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true
+        }
+      },
+      "kind": "route",
+      "mode": "offline",
+      "latency_ms": 25.05
     },
     {
       "id": "route_customer",
       "passed": true,
-      "detail": {},
-      "latency_ms": 231.923
+      "detail": {
+        "route": "customer",
+        "tools": [
+          "get_customer",
+          "predict_churn"
+        ],
+        "tool_statuses": [
+          "success",
+          "success"
+        ],
+        "error_codes": [],
+        "source_ids": [
+          "customer:CUST-001",
+          "model:uci563-rf-seed42-90d5fb6b"
+        ],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true,
+          "customer_source_equals_sql_join": true,
+          "score_equals_actual_pipeline": true,
+          "answer_displays_actual_score": true
+        }
+      },
+      "kind": "route",
+      "mode": "offline",
+      "latency_ms": 294.809
     },
     {
       "id": "route_both",
       "passed": true,
-      "detail": {},
-      "latency_ms": 23.471
+      "detail": {
+        "route": "both",
+        "tools": [
+          "get_customer",
+          "predict_churn",
+          "search_faqs"
+        ],
+        "tool_statuses": [
+          "success",
+          "success",
+          "success"
+        ],
+        "error_codes": [],
+        "source_ids": [
+          "customer:CUST-001",
+          "model:uci563-rf-seed42-90d5fb6b",
+          "faq:cancellation:0"
+        ],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true,
+          "customer_source_equals_sql_join": true,
+          "score_equals_actual_pipeline": true,
+          "answer_displays_actual_score": true
+        }
+      },
+      "kind": "route",
+      "mode": "offline",
+      "latency_ms": 28.428
     },
     {
       "id": "route_clarify",
       "passed": true,
-      "detail": {},
-      "latency_ms": 1.91
+      "detail": {
+        "route": "clarify",
+        "tools": [],
+        "tool_statuses": [],
+        "error_codes": [],
+        "source_ids": [],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true
+        }
+      },
+      "kind": "route",
+      "mode": "offline",
+      "latency_ms": 1.685
     },
     {
       "id": "sql_join_lookup",
       "passed": true,
-      "detail": {},
-      "latency_ms": 1.122
+      "detail": {
+        "customer_id": "CUST-001",
+        "display_name": "Demo Customer A",
+        "fictional": true,
+        "call_failures": 15,
+        "complaints": "yes",
+        "subscription_months": 12,
+        "charge_band": 1,
+        "seconds_of_use": 650,
+        "calls": 35,
+        "sms": 5,
+        "distinct_called_numbers": 12,
+        "tariff_plan": "pay_as_you_go"
+      },
+      "kind": "lookup",
+      "mode": "offline",
+      "latency_ms": 0.906
     },
     {
       "id": "unknown_customer",
       "passed": true,
-      "detail": {},
-      "latency_ms": 4.57
+      "detail": {
+        "http_status": 404,
+        "error_code": "customer_not_found"
+      },
+      "kind": "unknown_customer",
+      "mode": "offline",
+      "latency_ms": 3.719
     },
     {
       "id": "prediction_repeatability",
@@ -101,67 +247,390 @@
         "model_version": "uci563-rf-seed42-90d5fb6b",
         "caveat": "Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions."
       },
-      "latency_ms": 24.559
+      "kind": "prediction",
+      "mode": "offline",
+      "latency_ms": 27.98
     },
     {
       "id": "combined_graph",
       "passed": true,
-      "detail": {},
-      "latency_ms": 21.141
+      "detail": {
+        "route": "both",
+        "tools": [
+          "get_customer",
+          "predict_churn",
+          "search_faqs"
+        ],
+        "tool_statuses": [
+          "success",
+          "success",
+          "success"
+        ],
+        "error_codes": [],
+        "source_ids": [
+          "customer:CUST-001",
+          "model:uci563-rf-seed42-90d5fb6b",
+          "faq:cancellation:0"
+        ],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true,
+          "customer_source_equals_sql_join": true,
+          "score_equals_actual_pipeline": true,
+          "answer_displays_actual_score": true
+        }
+      },
+      "kind": "combined",
+      "mode": "offline",
+      "latency_ms": 26.414
     },
     {
       "id": "missing_id_clarification",
       "passed": true,
-      "detail": {},
-      "latency_ms": 1.691
+      "detail": {
+        "route": "clarify",
+        "tools": [],
+        "tool_statuses": [],
+        "error_codes": [],
+        "source_ids": [],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true
+        }
+      },
+      "kind": "clarification",
+      "mode": "offline",
+      "latency_ms": 1.639
     },
     {
       "id": "conflicting_id_clarification",
       "passed": true,
-      "detail": {},
-      "latency_ms": 1.522
+      "detail": {
+        "route": "clarify",
+        "tools": [],
+        "tool_statuses": [],
+        "error_codes": [],
+        "source_ids": [],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true
+        }
+      },
+      "kind": "conflicting_ids",
+      "mode": "offline",
+      "latency_ms": 1.1
     },
     {
       "id": "empty_message_rejected",
       "passed": true,
-      "detail": {},
-      "latency_ms": 1.816
+      "detail": {
+        "http_status": 422
+      },
+      "kind": "bad_request",
+      "mode": "offline",
+      "latency_ms": 1.784
     },
     {
       "id": "sql_injection_rejected",
       "passed": true,
-      "detail": {},
-      "latency_ms": 1.62
+      "detail": {
+        "http_status": 422
+      },
+      "kind": "bad_predict",
+      "mode": "offline",
+      "latency_ms": 1.157
     },
     {
       "id": "prediction_requires_lookup",
       "passed": true,
-      "detail": {},
-      "latency_ms": 1.011
+      "detail": {
+        "error_code": "lookup_required",
+        "attempts": 1,
+        "tool_trace": [
+          {
+            "agent": "customer",
+            "tool": "predict_churn",
+            "status": "error",
+            "code": "lookup_required"
+          }
+        ]
+      },
+      "kind": "lookup_required",
+      "mode": "offline",
+      "latency_ms": 1.003
     },
     {
       "id": "duplicate_call_blocked",
       "passed": true,
-      "detail": {},
-      "latency_ms": 1.0
+      "detail": {
+        "error_code": "repeated_tool_call",
+        "attempts": 2,
+        "tool_trace": [
+          {
+            "agent": "customer",
+            "tool": "get_customer",
+            "status": "success",
+            "code": null
+          },
+          {
+            "agent": "customer",
+            "tool": "get_customer",
+            "status": "error",
+            "code": "repeated_tool_call"
+          }
+        ]
+      },
+      "kind": "duplicate_call",
+      "mode": "offline",
+      "latency_ms": 0.78
     },
     {
       "id": "tool_budget_enforced",
       "passed": true,
-      "detail": {},
-      "latency_ms": 1.133
+      "detail": {
+        "error_code": "tool_budget_exceeded",
+        "attempts": 1,
+        "tool_trace": [
+          {
+            "agent": "customer",
+            "tool": "get_customer",
+            "status": "success",
+            "code": null
+          },
+          {
+            "agent": "customer",
+            "tool": "predict_churn",
+            "status": "error",
+            "code": "tool_budget_exceeded"
+          }
+        ]
+      },
+      "kind": "tool_budget",
+      "mode": "offline",
+      "latency_ms": 0.749
     },
     {
       "id": "tool_id_bound_to_user",
       "passed": true,
-      "detail": {},
-      "latency_ms": 0.114
+      "detail": {
+        "error_code": "customer_id_mismatch",
+        "attempts": 1,
+        "tool_trace": [
+          {
+            "agent": "customer",
+            "tool": "get_customer",
+            "status": "error",
+            "code": "customer_id_mismatch"
+          }
+        ]
+      },
+      "kind": "wrong_id",
+      "mode": "offline",
+      "latency_ms": 0.071
     },
     {
       "id": "agent_tool_allowlist",
       "passed": true,
-      "detail": {},
-      "latency_ms": 0.064
+      "detail": {
+        "error_code": "tool_not_allowed",
+        "attempts": 2,
+        "tool_trace": [
+          {
+            "agent": "knowledge",
+            "tool": "get_customer",
+            "status": "error",
+            "code": "tool_not_allowed"
+          },
+          {
+            "agent": "customer",
+            "tool": "delete_account",
+            "status": "error",
+            "code": "tool_not_allowed"
+          }
+        ]
+      },
+      "kind": "wrong_tool",
+      "mode": "offline",
+      "latency_ms": 0.103
+    },
+    {
+      "id": "retrieval_payment",
+      "passed": true,
+      "detail": {
+        "source_ids": [
+          "faq:payment:0",
+          "faq:billing:0",
+          "faq:payment:1"
+        ],
+        "scores": [
+          0.630403,
+          0.47514,
+          0.462442
+        ]
+      },
+      "kind": "retrieval",
+      "mode": "offline",
+      "latency_ms": 9.123
+    },
+    {
+      "id": "retrieval_support",
+      "passed": true,
+      "detail": {
+        "source_ids": [
+          "faq:support:0"
+        ],
+        "scores": [
+          0.375651
+        ]
+      },
+      "kind": "retrieval",
+      "mode": "offline",
+      "latency_ms": 8.068
+    },
+    {
+      "id": "retrieval_data_alerts",
+      "passed": true,
+      "detail": {
+        "source_ids": [
+          "faq:data:0",
+          "faq:data:1"
+        ],
+        "scores": [
+          0.670841,
+          0.585036
+        ]
+      },
+      "kind": "retrieval",
+      "mode": "offline",
+      "latency_ms": 8.824
+    },
+    {
+      "id": "retrieval_plan_change",
+      "passed": true,
+      "detail": {
+        "source_ids": [
+          "faq:plan_change:0",
+          "faq:plans:1",
+          "faq:data:0"
+        ],
+        "scores": [
+          0.683912,
+          0.427461,
+          0.414521
+        ]
+      },
+      "kind": "retrieval",
+      "mode": "offline",
+      "latency_ms": 9.094
+    },
+    {
+      "id": "profile_lookup_only",
+      "passed": true,
+      "detail": {
+        "route": "customer",
+        "tools": [
+          "get_customer"
+        ],
+        "tool_statuses": [
+          "success"
+        ],
+        "error_codes": [],
+        "source_ids": [
+          "customer:CUST-002"
+        ],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true,
+          "customer_source_equals_sql_join": true
+        }
+      },
+      "kind": "chat",
+      "mode": "offline",
+      "latency_ms": 4.523
+    },
+    {
+      "id": "combined_profile_plan",
+      "passed": true,
+      "detail": {
+        "route": "both",
+        "tools": [
+          "get_customer",
+          "search_faqs"
+        ],
+        "tool_statuses": [
+          "success",
+          "success"
+        ],
+        "error_codes": [],
+        "source_ids": [
+          "customer:CUST-002",
+          "faq:plan_change:0",
+          "faq:data:0",
+          "faq:plans:1"
+        ],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true,
+          "customer_source_equals_sql_join": true
+        }
+      },
+      "kind": "chat",
+      "mode": "offline",
+      "latency_ms": 13.217
+    },
+    {
+      "id": "combined_missing_customer_policy",
+      "passed": true,
+      "detail": {
+        "route": "both",
+        "tools": [
+          "get_customer",
+          "search_faqs"
+        ],
+        "tool_statuses": [
+          "error",
+          "success"
+        ],
+        "error_codes": [
+          "customer_not_found"
+        ],
+        "source_ids": [
+          "faq:cancellation:0"
+        ],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true
+        }
+      },
+      "kind": "chat",
+      "mode": "offline",
+      "latency_ms": 13.133
+    },
+    {
+      "id": "missing_model_partial_result",
+      "passed": true,
+      "detail": {
+        "route": "both",
+        "tools": [
+          "get_customer",
+          "predict_churn",
+          "search_faqs"
+        ],
+        "tool_statuses": [
+          "success",
+          "error",
+          "success"
+        ],
+        "error_codes": [
+          "model_unavailable"
+        ],
+        "source_ids": [
+          "customer:CUST-001",
+          "faq:cancellation:0"
+        ],
+        "evidence_checks": {
+          "citations_match_executed_retrieval": true,
+          "customer_source_equals_sql_join": true
+        },
+        "fault_injection": "Real model loader pointed to an absent temporary artifact; no mocked prediction."
+      },
+      "kind": "missing_model",
+      "mode": "offline",
+      "latency_ms": 23.87
     }
   ]
 }
