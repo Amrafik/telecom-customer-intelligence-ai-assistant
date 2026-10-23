@@ -1,0 +1,11 @@
+{
+  "data/raw/customer_churn.csv": "90d5fb6bd1630cd4de4b4d28fcf8b4cb92a8f6ab7484605b0799d47386f7dbe1",
+  "data/customers.json": "a95d5c3741667f38631049110b095d594543fca6a87a3a9c4a9864e8502b09b2",
+  "data/customers.sqlite3": "188104bc0c37b0bfdaabcbc98608847a8e2c2c54382226d6bcc8aad494341f74",
+  "models/churn_pipeline.joblib": "77bbe69c031e89563a1110e226f5daa44e2fe854c1cfd40b26bf82c7d82f4782",
+  "reports/benchmark.json": "10dac3fef87ef0395f099ebbc5fbb1fbebf30408b900a6660c35459a622b7ac3",
+  "reports/split.json": "c0d5d1d75994921e7be2e1b7ef42a30e75f0a9ce0fbee99e7c1a1c0ef73e73ea",
+  "reports/grid_search.csv": "9bde88b431131c50a9969e6ec1599e2a3ff323aa9f18891c6da8437f462a1b6d",
+  "artifacts/index/faqs.faiss": "187e69c73d832f8ec77cc51e8ff8fecc5ae429c25ac57292ef43b892f27ddc51",
+  "artifacts/index/metadata.json": "f596b635ecb3bf2ab785e14653e9a19e140a82427202a6e5e1b412caeb3e87fa"
+}

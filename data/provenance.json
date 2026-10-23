@@ -1,0 +1,11 @@
+{
+  "name": "UCI Iranian Churn",
+  "synthetic": false,
+  "citation": "Iranian Churn [Dataset]. (2020). UCI Machine Learning Repository. https://doi.org/10.24432/C5JW3Z",
+  "source": "https://archive.ics.uci.edu/dataset/563/iranian+churn+dataset",
+  "download": "https://archive.ics.uci.edu/static/public/563/iranian+churn+dataset.zip",
+  "license": "CC BY 4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "sha256": "90d5fb6bd1630cd4de4b4d28fcf8b4cb92a8f6ab7484605b0799d47386f7dbe1",
+  "notes": "Public anonymised training data; fictional app customers are authored separately. No Vodafone data or affiliation."
+}

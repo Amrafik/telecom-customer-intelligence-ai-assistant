@@ -1,0 +1,48 @@
+{
+  "run_at": "2026-10-23T11:29:14.775607+03:00",
+  "checks": {
+    "api_ready": true,
+    "gemini_only_health": true,
+    "prediction": true,
+    "unknown_customer_404": true,
+    "invalid_predict_422": true,
+    "chat_clarification_without_tools": true,
+    "streamlit_http": true,
+    "streamlit_render": true
+  },
+  "passed": 8,
+  "total": 8,
+  "health": {
+    "status": "ready",
+    "mode": "live",
+    "dependencies": {
+      "database": "ready",
+      "churn_model": "ready",
+      "faq_index": "ready"
+    },
+    "llm_provider": "gemini",
+    "llm_model": "gemini-3.5-flash-lite",
+    "llm_key_configured": true,
+    "llm_connectivity": "not checked by health endpoint",
+    "deployment": "local portfolio demo"
+  },
+  "prediction": {
+    "customer_id": "CUST-001",
+    "churn_probability": 0.9493094876793147,
+    "predicted_churn": true,
+    "threshold": 0.5,
+    "model_version": "uci563-rf-seed42-90d5fb6b",
+    "caveat": "Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions."
+  },
+  "clarification": {
+    "answer": "Use a fictional customer ID in the format CUST-001.",
+    "route": "clarify",
+    "mode": "live",
+    "sources": [],
+    "tool_trace": [],
+    "errors": [],
+    "request_id": "f29a28b7-b491-49c0-b9a6-03cd4241a6f7",
+    "latency_ms": 7.51
+  },
+  "scope": "Actual restarted localhost servers and Streamlit render; no extra Gemini calls. Offline UI chat is covered by complete pytest suite; real Gemini mixed/uncertainty cases are separate."
+}

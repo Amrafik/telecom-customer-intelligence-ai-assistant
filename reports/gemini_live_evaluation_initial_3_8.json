@@ -1,0 +1,137 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.8-flash",
+  "mode": "live",
+  "run_at": "2026-10-23T10:58:11.468461+03:00",
+  "model_availability": {
+    "model": "models/gemini-3.8-flash",
+    "supported_actions": [
+      "generateContent",
+      "countTokens",
+      "createCachedContent",
+      "batchGenerateContent"
+    ]
+  },
+  "passed": 1,
+  "total": 7,
+  "cases": [
+    {
+      "id": "faq",
+      "passed": false,
+      "checks": {
+        "http_200": false
+      },
+      "http_status": 503,
+      "latency_ms": 28633.597,
+      "response": {
+        "detail": "Gemini request failed. Check credentials, model access, quota and network.",
+        "code": "llm_unavailable",
+        "request_id": "facba993-cb01-40bb-8218-e14e1fb85a79"
+      },
+      "executed_tools": []
+    },
+    {
+      "id": "customer_lookup",
+      "passed": false,
+      "checks": {
+        "http_200": false
+      },
+      "http_status": 503,
+      "latency_ms": 29171.963,
+      "response": {
+        "detail": "Gemini request failed. Check credentials, model access, quota and network.",
+        "code": "llm_unavailable",
+        "request_id": "3fdfa335-d1ae-4751-9606-da57bb19e473"
+      },
+      "executed_tools": []
+    },
+    {
+      "id": "churn_prediction",
+      "passed": false,
+      "checks": {
+        "http_200": false
+      },
+      "http_status": 503,
+      "latency_ms": 28435.489,
+      "response": {
+        "detail": "Gemini request failed. Check credentials, model access, quota and network.",
+        "code": "llm_unavailable",
+        "request_id": "c9947b01-9608-4bed-b6b4-acc03da9889c"
+      },
+      "executed_tools": []
+    },
+    {
+      "id": "combined",
+      "passed": false,
+      "checks": {
+        "http_200": false
+      },
+      "http_status": 503,
+      "latency_ms": 28725.872,
+      "response": {
+        "detail": "Gemini request failed. Check credentials, model access, quota and network.",
+        "code": "llm_unavailable",
+        "request_id": "56b3cbce-41e1-44d6-a896-51324273dd21"
+      },
+      "executed_tools": []
+    },
+    {
+      "id": "invalid_customer",
+      "passed": false,
+      "checks": {
+        "http_200": false
+      },
+      "http_status": 503,
+      "latency_ms": 29155.873,
+      "response": {
+        "detail": "Gemini request failed. Check credentials, model access, quota and network.",
+        "code": "llm_unavailable",
+        "request_id": "ab7e7aa3-f38f-4daa-ac0c-f008048afd49"
+      },
+      "executed_tools": []
+    },
+    {
+      "id": "unsupported_price",
+      "passed": false,
+      "checks": {
+        "http_200": false
+      },
+      "http_status": 503,
+      "latency_ms": 28708.091,
+      "response": {
+        "detail": "Gemini request failed. Check credentials, model access, quota and network.",
+        "code": "llm_unavailable",
+        "request_id": "6a0cbac6-8120-41e2-9072-af423b2937ee"
+      },
+      "executed_tools": []
+    },
+    {
+      "id": "malformed_customer",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true
+      },
+      "http_status": 200,
+      "latency_ms": 3.582,
+      "response": {
+        "answer": "Use a fictional customer ID in the format CUST-001.",
+        "route": "clarify",
+        "mode": "live",
+        "sources": [],
+        "tool_trace": [],
+        "errors": [],
+        "request_id": "fbc677c1-6b30-49f1-ba4b-8db8ad645e3f",
+        "latency_ms": 1.596
+      },
+      "executed_tools": []
+    }
+  ],
+  "scope": "Actual Gemini requests, unchanged LangGraph, FastAPI and registry; evidence compared to executed FAISS search, SQLite JOIN and sklearn inference.",
+  "limitations": "Small smoke set; source identity and selected policy facts are checked, but this is not an exhaustive semantic entailment or security evaluation. Free-tier access and quotas are account-specific."
+}

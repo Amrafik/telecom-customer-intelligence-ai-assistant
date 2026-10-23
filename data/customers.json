@@ -1,0 +1,8 @@
+[
+  {"customer_id":"CUST-001","display_name":"Demo Customer A","fictional":true,"call_failures":15,"complaints":"yes","subscription_months":12,"charge_band":1,"seconds_of_use":650,"calls":35,"sms":5,"distinct_called_numbers":12,"tariff_plan":"pay_as_you_go"},
+  {"customer_id":"CUST-002","display_name":"Demo Customer B","fictional":true,"call_failures":1,"complaints":"no","subscription_months":36,"charge_band":4,"seconds_of_use":12500,"calls":220,"sms":100,"distinct_called_numbers":55,"tariff_plan":"contract"},
+  {"customer_id":"CUST-003","display_name":"Demo Customer C","fictional":true,"call_failures":5,"complaints":"no","subscription_months":18,"charge_band":2,"seconds_of_use":4500,"calls":80,"sms":20,"distinct_called_numbers":30,"tariff_plan":"pay_as_you_go"},
+  {"customer_id":"CUST-004","display_name":"Demo Customer D","fictional":true,"call_failures":12,"complaints":"yes","subscription_months":22,"charge_band":0,"seconds_of_use":320,"calls":14,"sms":0,"distinct_called_numbers":8,"tariff_plan":"contract"},
+  {"customer_id":"CUST-005","display_name":"Demo Customer E","fictional":true,"call_failures":3,"complaints":"no","subscription_months":28,"charge_band":3,"seconds_of_use":8200,"calls":155,"sms":65,"distinct_called_numbers":42,"tariff_plan":"pay_as_you_go"},
+  {"customer_id":"CUST-006","display_name":"Demo Customer F","fictional":true,"call_failures":7,"complaints":"no","subscription_months":9,"charge_band":1,"seconds_of_use":2100,"calls":47,"sms":15,"distinct_called_numbers":19,"tariff_plan":"pay_as_you_go"}
+]

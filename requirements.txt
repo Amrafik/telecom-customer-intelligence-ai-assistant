@@ -1,0 +1,19 @@
+# Use Python 3.11 or 3.12; verified on Python 3.12.9.
+langgraph==1.0.3
+google-genai==2.33.0
+streamlit==1.51.0
+fastapi==0.121.3
+uvicorn==0.38.0
+pydantic==2.12.5
+pydantic-settings==2.12.0
+scikit-learn==1.7.2
+pandas==2.3.3
+numpy==1.26.4
+faiss-cpu==1.12.0
+sentence-transformers==5.1.2
+transformers==4.57.1
+torch==2.5.1
+joblib==1.5.2
+httpx==0.28.1
+python-dotenv==1.2.1
+pytest==8.4.2

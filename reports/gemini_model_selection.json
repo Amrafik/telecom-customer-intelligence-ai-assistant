@@ -1,0 +1,12 @@
+{
+  "selected_model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai==2.33.0",
+  "documentation_checked_on": "2026-10-23",
+  "official_model_reference": "https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite",
+  "official_pricing_reference": "https://ai.google.dev/gemini-api/docs/pricing",
+  "observations": [
+    {"model":"gemini-3.8-flash","metadata_available":true,"simple_generation_http_status":500,"simple_generation_seconds":88.67,"end_to_end_report":"gemini_live_evaluation_initial_3_8.json"},
+    {"model":"gemini-3.5-flash-lite","metadata_available":true,"simple_generation_returned_text":true,"metadata_and_generation_seconds":1.12}
+  ],
+  "billing_note": "Google lists free-tier input/output text usage for the selected model. Successful generation does not independently prove this account's billing tier or remaining quota."
+}

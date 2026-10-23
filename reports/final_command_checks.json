@@ -1,0 +1,27 @@
+{
+  "run_at": "2026-10-23T11:32:24.210102+03:00",
+  "documentation_commands_resolve": {
+    "telecom.prepare_data": true,
+    "telecom.init_db": true,
+    "telecom.train": true,
+    "telecom.build_index": true,
+    "telecom.evaluate": true,
+    "telecom.evaluate_gemini": true,
+    "telecom.monitor": true,
+    "uvicorn": true,
+    "streamlit": true,
+    "project_path": true,
+    "venv_interpreter": true,
+    "ui_script": true,
+    "requirements_and_lock": true,
+    "environment_copy_guard": true
+  },
+  "openai_sdk_absent": true,
+  "obsolete_settings_absent": true,
+  "remaining_openai_references": [
+    "FINAL_TECHNICAL_AUDIT.md",
+    "reports/final_command_checks.json"
+  ],
+  "fresh_install_note": "Existing audited environment checked; no clean Windows install claimed. Training executed in temporary output by pytest; original artifacts preserved.",
+  "reference_note": "Only necessary cleanup/verification context in the audit and this verification record; none in active source, dependencies, config, scripts, tests or user guides."
+}

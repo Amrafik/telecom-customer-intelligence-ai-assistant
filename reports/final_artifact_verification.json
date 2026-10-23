@@ -1,0 +1,42 @@
+{
+  "run_at": "2026-10-23T11:30:44.869003+03:00",
+  "original_artifacts_unchanged": {
+    "data/raw/customer_churn.csv": true,
+    "data/customers.json": true,
+    "data/customers.sqlite3": true,
+    "models/churn_pipeline.joblib": true,
+    "reports/benchmark.json": true,
+    "reports/split.json": true,
+    "reports/grid_search.csv": true,
+    "artifacts/index/faqs.faiss": true,
+    "artifacts/index/metadata.json": true
+  },
+  "sqlite": {
+    "integrity": "ok",
+    "foreign_key_errors": [],
+    "profiles": 6,
+    "usage_rows": 6,
+    "joined_rows": 6
+  },
+  "all_sql_records_equal_seed": true,
+  "features": [
+    "call_failures",
+    "subscription_months",
+    "charge_band",
+    "seconds_of_use",
+    "calls",
+    "sms",
+    "distinct_called_numbers",
+    "complaints",
+    "tariff_plan"
+  ],
+  "model_classes": [
+    0,
+    1
+  ],
+  "fitted_tree_count": 100,
+  "faiss_vectors": 11,
+  "embedding_dimensions": 384,
+  "manifest_matches_current_source": true,
+  "hash_verification": "RF, baseline and raw data hashes also independently checked by pytest; full eight-configuration CV reproduced only in temporary output."
+}

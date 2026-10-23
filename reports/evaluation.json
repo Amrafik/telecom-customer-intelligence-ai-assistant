@@ -1,0 +1,167 @@
+{
+  "mode": "offline",
+  "run_at": "2026-10-23T11:25:58.233991+03:00",
+  "scope": "Real SQL, sklearn inference, FAISS retrieval, LangGraph and REST; rule-based routing and extractive answers; no Gemini calls.",
+  "passed": 22,
+  "total": 22,
+  "cases": [
+    {
+      "id": "retrieval_roaming",
+      "passed": true,
+      "detail": {
+        "source_ids": [
+          "faq:roaming:0"
+        ]
+      },
+      "latency_ms": 9401.917
+    },
+    {
+      "id": "retrieval_billing",
+      "passed": true,
+      "detail": {
+        "source_ids": [
+          "faq:billing:0",
+          "faq:payment:0",
+          "faq:payment:1"
+        ]
+      },
+      "latency_ms": 9.426
+    },
+    {
+      "id": "retrieval_cancellation",
+      "passed": true,
+      "detail": {
+        "source_ids": [
+          "faq:cancellation:0"
+        ]
+      },
+      "latency_ms": 9.593
+    },
+    {
+      "id": "retrieval_plans",
+      "passed": true,
+      "detail": {
+        "source_ids": [
+          "faq:plans:0",
+          "faq:plans:1"
+        ]
+      },
+      "latency_ms": 9.758
+    },
+    {
+      "id": "retrieval_no_evidence",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 9.129
+    },
+    {
+      "id": "route_knowledge",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 20.214
+    },
+    {
+      "id": "route_customer",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 231.923
+    },
+    {
+      "id": "route_both",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 23.471
+    },
+    {
+      "id": "route_clarify",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 1.91
+    },
+    {
+      "id": "sql_join_lookup",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 1.122
+    },
+    {
+      "id": "unknown_customer",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 4.57
+    },
+    {
+      "id": "prediction_repeatability",
+      "passed": true,
+      "detail": {
+        "customer_id": "CUST-001",
+        "churn_probability": 0.9493094876793147,
+        "predicted_churn": true,
+        "threshold": 0.5,
+        "model_version": "uci563-rf-seed42-90d5fb6b",
+        "caveat": "Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions."
+      },
+      "latency_ms": 24.559
+    },
+    {
+      "id": "combined_graph",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 21.141
+    },
+    {
+      "id": "missing_id_clarification",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 1.691
+    },
+    {
+      "id": "conflicting_id_clarification",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 1.522
+    },
+    {
+      "id": "empty_message_rejected",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 1.816
+    },
+    {
+      "id": "sql_injection_rejected",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 1.62
+    },
+    {
+      "id": "prediction_requires_lookup",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 1.011
+    },
+    {
+      "id": "duplicate_call_blocked",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 1.0
+    },
+    {
+      "id": "tool_budget_enforced",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 1.133
+    },
+    {
+      "id": "tool_id_bound_to_user",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 0.114
+    },
+    {
+      "id": "agent_tool_allowlist",
+      "passed": true,
+      "detail": {},
+      "latency_ms": 0.064
+    }
+  ]
+}

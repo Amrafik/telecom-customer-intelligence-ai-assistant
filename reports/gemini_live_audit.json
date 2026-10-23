@@ -1,0 +1,218 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "mode": "live",
+  "run_at": "2026-10-23T11:26:31.183819+03:00",
+  "model_availability": {
+    "model": "models/gemini-3.5-flash-lite",
+    "supported_actions": [
+      "generateContent",
+      "countTokens",
+      "createCachedContent",
+      "batchGenerateContent"
+    ]
+  },
+  "passed": 2,
+  "total": 2,
+  "cases": [
+    {
+      "id": "combined",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true,
+        "expected_policy_cited": true,
+        "expected_policy_fact_present": true,
+        "customer_source_equals_sql_join": true,
+        "score_equals_actual_pipeline": true,
+        "answer_displays_actual_score": true
+      },
+      "http_status": 200,
+      "latency_ms": 13989.11,
+      "response": {
+        "answer": "Customer intelligence:\nCUST-001 is Demo Customer A (fictional). Subscription: 12 months; tariff: pay_as_you_go; complaint recorded: yes; failed calls: 15.\n\nEstimated churn probability: 94.9%. Classification at threshold 0.50: churn. Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions. This score does not establish a cause of churn.\n\nFAQ guidance:\nTo cancel, request it through support or a DemoTel service store after identity verification, and pay any outstanding balance. An early termination fee may apply depending on the individual agreement.",
+        "route": "both",
+        "mode": "live",
+        "sources": [
+          {
+            "source_id": "customer:CUST-001",
+            "title": "Fictional customer record",
+            "reference": "sqlite:customers+usage_metrics#CUST-001",
+            "excerpt": "{\"customer_id\": \"CUST-001\", \"display_name\": \"Demo Customer A\", \"fictional\": true, \"call_failures\": 15, \"complaints\": \"yes\", \"subscription_months\": 12, \"charge_band\": 1, \"seconds_of_use\": 650, \"calls\": 35, \"sms\": 5, \"distinct_called_numbers\": 12, \"tariff_plan\": \"pay_as_you_go\"}",
+            "score": null
+          },
+          {
+            "source_id": "model:uci563-rf-seed42-90d5fb6b",
+            "title": "Local churn model result",
+            "reference": "reports/benchmark.json",
+            "excerpt": "{\"customer_id\": \"CUST-001\", \"churn_probability\": 0.9493094876793147, \"predicted_churn\": true, \"threshold\": 0.5, \"model_version\": \"uci563-rf-seed42-90d5fb6b\", \"caveat\": \"Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions.\"}",
+            "score": null
+          },
+          {
+            "source_id": "faq:cancellation:0",
+            "title": "Cancellation and contract closure",
+            "reference": "data/faqs.json#cancellation",
+            "excerpt": "Fictional DemoTel policy: Request cancellation through support or a DemoTel service store after identity verification. Pay any outstanding balance. A contract may have an early termination fee; support must check the individual agreement. The assistant cannot cancel a line or calculate an individual termination fee.",
+            "score": 0.678722
+          }
+        ],
+        "tool_trace": [
+          {
+            "agent": "customer",
+            "tool": "get_customer",
+            "status": "success",
+            "code": null
+          },
+          {
+            "agent": "customer",
+            "tool": "predict_churn",
+            "status": "success",
+            "code": null
+          },
+          {
+            "agent": "knowledge",
+            "tool": "search_faqs",
+            "status": "success",
+            "code": null
+          }
+        ],
+        "errors": [],
+        "request_id": "9631e994-4350-4590-9031-b2f199e0a35b",
+        "latency_ms": 13972.662
+      },
+      "executed_tools": [
+        {
+          "agent": "customer",
+          "tool": "get_customer",
+          "result": {
+            "ok": true,
+            "data": {
+              "customer_id": "CUST-001",
+              "display_name": "Demo Customer A",
+              "fictional": true,
+              "call_failures": 15,
+              "complaints": "yes",
+              "subscription_months": 12,
+              "charge_band": 1,
+              "seconds_of_use": 650,
+              "calls": 35,
+              "sms": 5,
+              "distinct_called_numbers": 12,
+              "tariff_plan": "pay_as_you_go"
+            }
+          }
+        },
+        {
+          "agent": "customer",
+          "tool": "predict_churn",
+          "result": {
+            "ok": true,
+            "data": {
+              "customer_id": "CUST-001",
+              "churn_probability": 0.9493094876793147,
+              "predicted_churn": true,
+              "threshold": 0.5,
+              "model_version": "uci563-rf-seed42-90d5fb6b",
+              "caveat": "Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions."
+            }
+          }
+        },
+        {
+          "agent": "knowledge",
+          "tool": "search_faqs",
+          "result": {
+            "ok": true,
+            "data": [
+              {
+                "source_id": "faq:cancellation:0",
+                "title": "Cancellation and contract closure",
+                "reference": "data/faqs.json#cancellation",
+                "excerpt": "Fictional DemoTel policy: Request cancellation through support or a DemoTel service store after identity verification. Pay any outstanding balance. A contract may have an early termination fee; support must check the individual agreement. The assistant cannot cancel a line or calculate an individual termination fee.",
+                "score": 0.678722
+              },
+              {
+                "source_id": "faq:plan_change:0",
+                "title": "Changing a mobile plan",
+                "reference": "data/faqs.json#plan_change",
+                "excerpt": "Fictional DemoTel policy: Request a plan change in the app under My Plan or contact support. A change takes effect at the next billing cycle. Existing contractual commitments must be checked by support. No retention discount is guaranteed. The assistant can explain options but cannot modify a subscription.",
+                "score": 0.37699
+              },
+              {
+                "source_id": "faq:data:0",
+                "title": "Data allowance and usage alerts",
+                "reference": "data/faqs.json#data",
+                "excerpt": "Fictional DemoTel policy: Check remaining mobile data in the app under Usage. Usage alerts are sent at 80% and 100% of the bundle. Unused monthly data expires at the billing-cycle end; it does not roll over. When the allowance is exhausted, turn off mobile data or ask support about an",
+                "score": 0.366623
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "unsupported_price",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true,
+        "unsupported_price_returns_uncertainty": true
+      },
+      "http_status": 200,
+      "latency_ms": 2584.223,
+      "response": {
+        "answer": "FAQ guidance:\nI don't have enough information in the fictional DemoTel FAQs to answer that. Please contact DemoTel support to confirm.",
+        "route": "knowledge",
+        "mode": "live",
+        "sources": [],
+        "tool_trace": [
+          {
+            "agent": "knowledge",
+            "tool": "search_faqs",
+            "status": "success",
+            "code": null
+          }
+        ],
+        "errors": [],
+        "request_id": "9662ebc8-013e-44c4-8e50-b759da74124b",
+        "latency_ms": 2581.455
+      },
+      "executed_tools": [
+        {
+          "agent": "knowledge",
+          "tool": "search_faqs",
+          "result": {
+            "ok": true,
+            "data": [
+              {
+                "source_id": "faq:roaming:0",
+                "title": "International roaming activation",
+                "reference": "data/faqs.json#roaming",
+                "excerpt": "Fictional DemoTel policy: Before travelling abroad, enable international roaming in the DemoTel app and confirm destination coverage with support. A roaming bundle must be activated before use. Calls, SMS and mobile data outside a bundle can incur extra charges. The FAQ does not list destination-specific prices or coverage.",
+                "score": 0.378844
+              },
+              {
+                "source_id": "faq:plans:0",
+                "title": "Available mobile plans",
+                "reference": "data/faqs.json#plans",
+                "excerpt": "Fictional DemoTel catalogue: Flex Start costs EGP 120 per month and includes 6 GB of data and 200 local minutes. Flex Plus costs EGP 220 per month and includes 15 GB of data and 500 local minutes. These are fictional portfolio examples, not real offers. Extra usage is charged separately;",
+                "score": 0.378422
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "scope": "Actual Gemini requests, unchanged LangGraph, FastAPI and registry; evidence compared to executed FAISS search, SQLite JOIN and sklearn inference.",
+  "limitations": "Small smoke set; source identity and selected policy facts are checked, but this is not an exhaustive semantic entailment or security evaluation. Free-tier access and quotas are account-specific."
+}

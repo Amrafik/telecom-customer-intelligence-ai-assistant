@@ -1,0 +1,509 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "mode": "live",
+  "run_at": "2026-10-23T11:00:53.663114+03:00",
+  "model_availability": {
+    "model": "models/gemini-3.5-flash-lite",
+    "supported_actions": [
+      "generateContent",
+      "countTokens",
+      "createCachedContent",
+      "batchGenerateContent"
+    ]
+  },
+  "passed": 7,
+  "total": 7,
+  "cases": [
+    {
+      "id": "faq",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true,
+        "expected_policy_cited": true,
+        "expected_policy_fact_present": true
+      },
+      "http_status": 200,
+      "latency_ms": 11048.217,
+      "response": {
+        "answer": "FAQ guidance:\nEnable international roaming in the DemoTel app before travelling and confirm destination coverage with support. You must also activate a roaming bundle before use.",
+        "route": "knowledge",
+        "mode": "live",
+        "sources": [
+          {
+            "source_id": "faq:roaming:0",
+            "title": "International roaming activation",
+            "reference": "data/faqs.json#roaming",
+            "excerpt": "Fictional DemoTel policy: Before travelling abroad, enable international roaming in the DemoTel app and confirm destination coverage with support. A roaming bundle must be activated before use. Calls, SMS and mobile data outside a bundle can incur extra charges. The FAQ does not list destination-specific prices or coverage.",
+            "score": 0.687244
+          }
+        ],
+        "tool_trace": [
+          {
+            "agent": "knowledge",
+            "tool": "search_faqs",
+            "status": "success",
+            "code": null
+          }
+        ],
+        "errors": [],
+        "request_id": "f45c658b-a030-4834-8888-17803d28986f",
+        "latency_ms": 11044.793
+      },
+      "executed_tools": [
+        {
+          "agent": "knowledge",
+          "tool": "search_faqs",
+          "result": {
+            "ok": true,
+            "data": [
+              {
+                "source_id": "faq:roaming:0",
+                "title": "International roaming activation",
+                "reference": "data/faqs.json#roaming",
+                "excerpt": "Fictional DemoTel policy: Before travelling abroad, enable international roaming in the DemoTel app and confirm destination coverage with support. A roaming bundle must be activated before use. Calls, SMS and mobile data outside a bundle can incur extra charges. The FAQ does not list destination-specific prices or coverage.",
+                "score": 0.687244
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "customer_lookup",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true,
+        "customer_source_equals_sql_join": true
+      },
+      "http_status": 200,
+      "latency_ms": 3113.23,
+      "response": {
+        "answer": "Customer intelligence:\nCUST-002 is Demo Customer B (fictional). Subscription: 36 months; tariff: contract; complaint recorded: no; failed calls: 1.",
+        "route": "customer",
+        "mode": "live",
+        "sources": [
+          {
+            "source_id": "customer:CUST-002",
+            "title": "Fictional customer record",
+            "reference": "sqlite:customers+usage_metrics#CUST-002",
+            "excerpt": "{\"customer_id\": \"CUST-002\", \"display_name\": \"Demo Customer B\", \"fictional\": true, \"call_failures\": 1, \"complaints\": \"no\", \"subscription_months\": 36, \"charge_band\": 4, \"seconds_of_use\": 12500, \"calls\": 220, \"sms\": 100, \"distinct_called_numbers\": 55, \"tariff_plan\": \"contract\"}",
+            "score": null
+          }
+        ],
+        "tool_trace": [
+          {
+            "agent": "customer",
+            "tool": "get_customer",
+            "status": "success",
+            "code": null
+          }
+        ],
+        "errors": [],
+        "request_id": "a07cab70-7214-430b-8a14-2f9735410b9a",
+        "latency_ms": 3110.052
+      },
+      "executed_tools": [
+        {
+          "agent": "customer",
+          "tool": "get_customer",
+          "result": {
+            "ok": true,
+            "data": {
+              "customer_id": "CUST-002",
+              "display_name": "Demo Customer B",
+              "fictional": true,
+              "call_failures": 1,
+              "complaints": "no",
+              "subscription_months": 36,
+              "charge_band": 4,
+              "seconds_of_use": 12500,
+              "calls": 220,
+              "sms": 100,
+              "distinct_called_numbers": 55,
+              "tariff_plan": "contract"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "churn_prediction",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true,
+        "customer_source_equals_sql_join": true,
+        "score_equals_actual_pipeline": true,
+        "answer_displays_actual_score": true
+      },
+      "http_status": 200,
+      "latency_ms": 2475.141,
+      "response": {
+        "answer": "Customer intelligence:\nCUST-001 is Demo Customer A (fictional). Subscription: 12 months; tariff: pay_as_you_go; complaint recorded: yes; failed calls: 15.\n\nEstimated churn probability: 94.9%. Classification at threshold 0.50: churn. Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions. This score does not establish a cause of churn.",
+        "route": "customer",
+        "mode": "live",
+        "sources": [
+          {
+            "source_id": "customer:CUST-001",
+            "title": "Fictional customer record",
+            "reference": "sqlite:customers+usage_metrics#CUST-001",
+            "excerpt": "{\"customer_id\": \"CUST-001\", \"display_name\": \"Demo Customer A\", \"fictional\": true, \"call_failures\": 15, \"complaints\": \"yes\", \"subscription_months\": 12, \"charge_band\": 1, \"seconds_of_use\": 650, \"calls\": 35, \"sms\": 5, \"distinct_called_numbers\": 12, \"tariff_plan\": \"pay_as_you_go\"}",
+            "score": null
+          },
+          {
+            "source_id": "model:uci563-rf-seed42-90d5fb6b",
+            "title": "Local churn model result",
+            "reference": "reports/benchmark.json",
+            "excerpt": "{\"customer_id\": \"CUST-001\", \"churn_probability\": 0.9493094876793147, \"predicted_churn\": true, \"threshold\": 0.5, \"model_version\": \"uci563-rf-seed42-90d5fb6b\", \"caveat\": \"Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions.\"}",
+            "score": null
+          }
+        ],
+        "tool_trace": [
+          {
+            "agent": "customer",
+            "tool": "get_customer",
+            "status": "success",
+            "code": null
+          },
+          {
+            "agent": "customer",
+            "tool": "predict_churn",
+            "status": "success",
+            "code": null
+          }
+        ],
+        "errors": [],
+        "request_id": "30fcc9f9-a34c-452c-91c0-fcc434f58b2b",
+        "latency_ms": 2462.89
+      },
+      "executed_tools": [
+        {
+          "agent": "customer",
+          "tool": "get_customer",
+          "result": {
+            "ok": true,
+            "data": {
+              "customer_id": "CUST-001",
+              "display_name": "Demo Customer A",
+              "fictional": true,
+              "call_failures": 15,
+              "complaints": "yes",
+              "subscription_months": 12,
+              "charge_band": 1,
+              "seconds_of_use": 650,
+              "calls": 35,
+              "sms": 5,
+              "distinct_called_numbers": 12,
+              "tariff_plan": "pay_as_you_go"
+            }
+          }
+        },
+        {
+          "agent": "customer",
+          "tool": "predict_churn",
+          "result": {
+            "ok": true,
+            "data": {
+              "customer_id": "CUST-001",
+              "churn_probability": 0.9493094876793147,
+              "predicted_churn": true,
+              "threshold": 0.5,
+              "model_version": "uci563-rf-seed42-90d5fb6b",
+              "caveat": "Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "combined",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true,
+        "expected_policy_cited": true,
+        "expected_policy_fact_present": true,
+        "customer_source_equals_sql_join": true,
+        "score_equals_actual_pipeline": true,
+        "answer_displays_actual_score": true
+      },
+      "http_status": 200,
+      "latency_ms": 3617.997,
+      "response": {
+        "answer": "Customer intelligence:\nCUST-001 is Demo Customer A (fictional). Subscription: 12 months; tariff: pay_as_you_go; complaint recorded: yes; failed calls: 15.\n\nEstimated churn probability: 94.9%. Classification at threshold 0.50: churn. Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions. This score does not establish a cause of churn.\n\nFAQ guidance:\nTo cancel, request it through support or a DemoTel service store after identity verification, and pay any outstanding balance. Contracts may include an early termination fee, which support must verify from the individual agreement.",
+        "route": "both",
+        "mode": "live",
+        "sources": [
+          {
+            "source_id": "customer:CUST-001",
+            "title": "Fictional customer record",
+            "reference": "sqlite:customers+usage_metrics#CUST-001",
+            "excerpt": "{\"customer_id\": \"CUST-001\", \"display_name\": \"Demo Customer A\", \"fictional\": true, \"call_failures\": 15, \"complaints\": \"yes\", \"subscription_months\": 12, \"charge_band\": 1, \"seconds_of_use\": 650, \"calls\": 35, \"sms\": 5, \"distinct_called_numbers\": 12, \"tariff_plan\": \"pay_as_you_go\"}",
+            "score": null
+          },
+          {
+            "source_id": "model:uci563-rf-seed42-90d5fb6b",
+            "title": "Local churn model result",
+            "reference": "reports/benchmark.json",
+            "excerpt": "{\"customer_id\": \"CUST-001\", \"churn_probability\": 0.9493094876793147, \"predicted_churn\": true, \"threshold\": 0.5, \"model_version\": \"uci563-rf-seed42-90d5fb6b\", \"caveat\": \"Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions.\"}",
+            "score": null
+          },
+          {
+            "source_id": "faq:cancellation:0",
+            "title": "Cancellation and contract closure",
+            "reference": "data/faqs.json#cancellation",
+            "excerpt": "Fictional DemoTel policy: Request cancellation through support or a DemoTel service store after identity verification. Pay any outstanding balance. A contract may have an early termination fee; support must check the individual agreement. The assistant cannot cancel a line or calculate an individual termination fee.",
+            "score": 0.678722
+          }
+        ],
+        "tool_trace": [
+          {
+            "agent": "customer",
+            "tool": "get_customer",
+            "status": "success",
+            "code": null
+          },
+          {
+            "agent": "customer",
+            "tool": "predict_churn",
+            "status": "success",
+            "code": null
+          },
+          {
+            "agent": "knowledge",
+            "tool": "search_faqs",
+            "status": "success",
+            "code": null
+          }
+        ],
+        "errors": [],
+        "request_id": "b6e08709-0718-42d4-acdb-497c5e9b980d",
+        "latency_ms": 3600.286
+      },
+      "executed_tools": [
+        {
+          "agent": "customer",
+          "tool": "get_customer",
+          "result": {
+            "ok": true,
+            "data": {
+              "customer_id": "CUST-001",
+              "display_name": "Demo Customer A",
+              "fictional": true,
+              "call_failures": 15,
+              "complaints": "yes",
+              "subscription_months": 12,
+              "charge_band": 1,
+              "seconds_of_use": 650,
+              "calls": 35,
+              "sms": 5,
+              "distinct_called_numbers": 12,
+              "tariff_plan": "pay_as_you_go"
+            }
+          }
+        },
+        {
+          "agent": "customer",
+          "tool": "predict_churn",
+          "result": {
+            "ok": true,
+            "data": {
+              "customer_id": "CUST-001",
+              "churn_probability": 0.9493094876793147,
+              "predicted_churn": true,
+              "threshold": 0.5,
+              "model_version": "uci563-rf-seed42-90d5fb6b",
+              "caveat": "Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions."
+            }
+          }
+        },
+        {
+          "agent": "knowledge",
+          "tool": "search_faqs",
+          "result": {
+            "ok": true,
+            "data": [
+              {
+                "source_id": "faq:cancellation:0",
+                "title": "Cancellation and contract closure",
+                "reference": "data/faqs.json#cancellation",
+                "excerpt": "Fictional DemoTel policy: Request cancellation through support or a DemoTel service store after identity verification. Pay any outstanding balance. A contract may have an early termination fee; support must check the individual agreement. The assistant cannot cancel a line or calculate an individual termination fee.",
+                "score": 0.678722
+              },
+              {
+                "source_id": "faq:plan_change:0",
+                "title": "Changing a mobile plan",
+                "reference": "data/faqs.json#plan_change",
+                "excerpt": "Fictional DemoTel policy: Request a plan change in the app under My Plan or contact support. A change takes effect at the next billing cycle. Existing contractual commitments must be checked by support. No retention discount is guaranteed. The assistant can explain options but cannot modify a subscription.",
+                "score": 0.37699
+              },
+              {
+                "source_id": "faq:data:0",
+                "title": "Data allowance and usage alerts",
+                "reference": "data/faqs.json#data",
+                "excerpt": "Fictional DemoTel policy: Check remaining mobile data in the app under Usage. Usage alerts are sent at 80% and 100% of the bundle. Unused monthly data expires at the billing-cycle end; it does not roll over. When the allowance is exhausted, turn off mobile data or ask support about an",
+                "score": 0.366623
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "invalid_customer",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "explicit_missing_customer": true,
+        "no_fabricated_sources": true,
+        "lookup_failed_before_prediction": true
+      },
+      "http_status": 200,
+      "latency_ms": 1695.977,
+      "response": {
+        "answer": "Customer intelligence:\nFictional customer CUST-999 was not found.",
+        "route": "customer",
+        "mode": "live",
+        "sources": [],
+        "tool_trace": [
+          {
+            "agent": "customer",
+            "tool": "get_customer",
+            "status": "error",
+            "code": "customer_not_found"
+          }
+        ],
+        "errors": [
+          "customer_not_found"
+        ],
+        "request_id": "f3eebefb-ceee-446e-8475-f38a7f42906c",
+        "latency_ms": 1693.013
+      },
+      "executed_tools": [
+        {
+          "agent": "customer",
+          "tool": "get_customer",
+          "result": {
+            "ok": false,
+            "error": {
+              "code": "customer_not_found",
+              "message": "Fictional customer CUST-999 was not found."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "unsupported_price",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true,
+        "unsupported_price_returns_uncertainty": true
+      },
+      "http_status": 200,
+      "latency_ms": 2477.48,
+      "response": {
+        "answer": "FAQ guidance:\nI don't have enough information in the fictional DemoTel FAQs to answer that. Please contact DemoTel support to confirm.",
+        "route": "knowledge",
+        "mode": "live",
+        "sources": [],
+        "tool_trace": [
+          {
+            "agent": "knowledge",
+            "tool": "search_faqs",
+            "status": "success",
+            "code": null
+          }
+        ],
+        "errors": [],
+        "request_id": "28280893-c3a8-4e14-97d1-6136d73e0a66",
+        "latency_ms": 2474.636
+      },
+      "executed_tools": [
+        {
+          "agent": "knowledge",
+          "tool": "search_faqs",
+          "result": {
+            "ok": true,
+            "data": [
+              {
+                "source_id": "faq:roaming:0",
+                "title": "International roaming activation",
+                "reference": "data/faqs.json#roaming",
+                "excerpt": "Fictional DemoTel policy: Before travelling abroad, enable international roaming in the DemoTel app and confirm destination coverage with support. A roaming bundle must be activated before use. Calls, SMS and mobile data outside a bundle can incur extra charges. The FAQ does not list destination-specific prices or coverage.",
+                "score": 0.378269
+              },
+              {
+                "source_id": "faq:plans:0",
+                "title": "Available mobile plans",
+                "reference": "data/faqs.json#plans",
+                "excerpt": "Fictional DemoTel catalogue: Flex Start costs EGP 120 per month and includes 6 GB of data and 200 local minutes. Flex Plus costs EGP 220 per month and includes 15 GB of data and 500 local minutes. These are fictional portfolio examples, not real offers. Extra usage is charged separately;",
+                "score": 0.372108
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "malformed_customer",
+      "passed": true,
+      "checks": {
+        "http_200": true,
+        "expected_route": true,
+        "actual_tools_in_order": true,
+        "trace_matches_execution": true,
+        "no_agent_errors": true,
+        "tools_succeeded": true,
+        "citations_match_executed_retrieval": true
+      },
+      "http_status": 200,
+      "latency_ms": 3.655,
+      "response": {
+        "answer": "Use a fictional customer ID in the format CUST-001.",
+        "route": "clarify",
+        "mode": "live",
+        "sources": [],
+        "tool_trace": [],
+        "errors": [],
+        "request_id": "f02dcc44-7970-444f-84fd-0d059d60e066",
+        "latency_ms": 1.477
+      },
+      "executed_tools": []
+    }
+  ],
+  "scope": "Actual Gemini requests, unchanged LangGraph, FastAPI and registry; evidence compared to executed FAISS search, SQLite JOIN and sklearn inference.",
+  "limitations": "Small smoke set; source identity and selected policy facts are checked, but this is not an exhaustive semantic entailment or security evaluation. Free-tier access and quotas are account-specific."
+}

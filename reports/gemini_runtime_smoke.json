@@ -1,0 +1,83 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "api_status": 200,
+  "streamlit_status": 200,
+  "combined_http_response": {
+    "answer": "Customer intelligence:\nCUST-001 is Demo Customer A (fictional). Subscription: 12 months; tariff: pay_as_you_go; complaint recorded: yes; failed calls: 15.\n\nEstimated churn probability: 94.9%. Classification at threshold 0.50: churn. Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions. This score does not establish a cause of churn.\n\nFAQ guidance:\nTo cancel, request it through support or a DemoTel service store after identity verification, and pay any outstanding balance. Contracts may include an early termination fee, which support must verify from the individual agreement.",
+    "route": "both",
+    "mode": "live",
+    "sources": [
+      {
+        "source_id": "customer:CUST-001",
+        "title": "Fictional customer record",
+        "reference": "sqlite:customers+usage_metrics#CUST-001",
+        "excerpt": "{\"customer_id\": \"CUST-001\", \"display_name\": \"Demo Customer A\", \"fictional\": true, \"call_failures\": 15, \"complaints\": \"yes\", \"subscription_months\": 12, \"charge_band\": 1, \"seconds_of_use\": 650, \"calls\": 35, \"sms\": 5, \"distinct_called_numbers\": 12, \"tariff_plan\": \"pay_as_you_go\"}",
+        "score": null
+      },
+      {
+        "source_id": "model:uci563-rf-seed42-90d5fb6b",
+        "title": "Local churn model result",
+        "reference": "reports/benchmark.json",
+        "excerpt": "{\"customer_id\": \"CUST-001\", \"churn_probability\": 0.9493094876793147, \"predicted_churn\": true, \"threshold\": 0.5, \"model_version\": \"uci563-rf-seed42-90d5fb6b\", \"caveat\": \"Illustrative score for a fictional customer using a public Iranian dataset; not validated for Egypt or operational decisions.\"}",
+        "score": null
+      },
+      {
+        "source_id": "faq:cancellation:0",
+        "title": "Cancellation and contract closure",
+        "reference": "data/faqs.json#cancellation",
+        "excerpt": "Fictional DemoTel policy: Request cancellation through support or a DemoTel service store after identity verification. Pay any outstanding balance. A contract may have an early termination fee; support must check the individual agreement. The assistant cannot cancel a line or calculate an individual termination fee.",
+        "score": 0.678722
+      }
+    ],
+    "tool_trace": [
+      {
+        "agent": "customer",
+        "tool": "get_customer",
+        "status": "success",
+        "code": null
+      },
+      {
+        "agent": "customer",
+        "tool": "predict_churn",
+        "status": "success",
+        "code": null
+      },
+      {
+        "agent": "knowledge",
+        "tool": "search_faqs",
+        "status": "success",
+        "code": null
+      }
+    ],
+    "errors": [],
+    "request_id": "3149c0c3-17ad-4f35-99ec-060d2ca556e7",
+    "latency_ms": 5909.064
+  },
+  "streamlit_actual_chat_result": {
+    "answer": "FAQ guidance:\nEnable international roaming in the DemoTel app before travelling and confirm destination coverage with support. You must also activate a roaming bundle before use.",
+    "route": "knowledge",
+    "mode": "live",
+    "sources": [
+      {
+        "source_id": "faq:roaming:0",
+        "title": "International roaming activation",
+        "reference": "data/faqs.json#roaming",
+        "excerpt": "Fictional DemoTel policy: Before travelling abroad, enable international roaming in the DemoTel app and confirm destination coverage with support. A roaming bundle must be activated before use. Calls, SMS and mobile data outside a bundle can incur extra charges. The FAQ does not list destination-specific prices or coverage.",
+        "score": 0.687244
+      }
+    ],
+    "tool_trace": [
+      {
+        "agent": "knowledge",
+        "tool": "search_faqs",
+        "status": "success",
+        "code": null
+      }
+    ],
+    "errors": [],
+    "request_id": "d78b5d32-7f0e-4efe-b751-8703e72a6b0c",
+    "latency_ms": 2282.04
+  },
+  "streamlit_assertions_passed": true
+}
