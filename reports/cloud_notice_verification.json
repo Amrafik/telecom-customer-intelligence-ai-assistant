@@ -1,0 +1,40 @@
+{
+  "scope": "Cloud recruiter notice, supported viewer toolbar configuration, cloud safeguards and local UI integration.",
+  "pytest_report": "reports/cloud_notice_pytest.xml",
+  "pytest": {
+    "tests": 21,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "console_seconds": 26.11,
+    "upstream_warnings": 4
+  },
+  "gemini_calls": 0,
+  "staged_secret_scan": {
+    "tracked_and_staged_blobs_scanned": 90,
+    "credential_findings": 0,
+    "scope": "Actual local credential values and common secret patterns; current snapshot only. Real secret files remain ignored and untracked."
+  },
+  "cloud_mode": "offline only",
+  "toolbar_mode": "viewer",
+  "toolbar_verification": "Configuration asserted by Streamlit AppTest and inspected in pinned Streamlit source; actual hosted browser chrome after update not verified. Cloud-supplied owner controls may remain.",
+  "local_ui_and_runtime_configuration": "Unchanged",
+  "historical_live_claim_evidence": [
+    {
+      "path": "reports/gemini_live_evaluation.json",
+      "passed": 7,
+      "total": 7,
+      "mode": "live"
+    },
+    {
+      "path": "reports/gemini_portfolio_smoke.json",
+      "passed": 1,
+      "total": 1,
+      "mode": "live"
+    }
+  ],
+  "limitations": [
+    "AppTest validates UI elements and configuration, not a rendered browser screenshot.",
+    "Earlier live evidence supports the local-mode statement; no new live provider checks were made."
+  ]
+}

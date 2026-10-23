@@ -198,11 +198,20 @@ def test_process_registry_survives_streamlit_cache_clear(tmp_path, monkeypatch):
 
 
 def test_cloud_ui_chats_and_reruns_share_backend(assistant, tmp_path, monkeypatch):
+    import streamlit as st
+    previous_toolbar = st.get_option("client.toolbarMode")
     runtime = CloudRuntime(tmp_path, factory=lambda path: assistant)
     monkeypatch.setattr(cloud_runtime, "get_runtime", lambda limits: runtime)
     try:
         ui = AppTest.from_file(str(ROOT / "deploy/streamlit/app.py"), default_timeout=40).run()
         assert not ui.exception and len(ui.chat_input) == 1
+        notice = ui.info[0].value
+        assert "deterministic routing" in notice and "no Gemini API calls" in notice
+        assert all(component in notice for component in ["SQLite", "Scikit-learn", "FAISS", "LangGraph"])
+        captions = "\n".join(item.value for item in ui.caption)
+        assert "full local version" in captions and "verified in recorded live tests" in captions
+        assert "https://github.com/Amrafik/telecom-customer-intelligence-ai-assistant" in captions
+        assert st.get_option("client.toolbarMode") == "viewer"
         thread = runtime.thread
         ui.chat_input[0].set_value("Predict churn for CUST-001 and explain cancellation.").run()
         assert not ui.exception
@@ -217,6 +226,7 @@ def test_cloud_ui_chats_and_reruns_share_backend(assistant, tmp_path, monkeypatc
         runtime.stop()
         from streamlit import cache_resource
         cache_resource.clear()
+        st.set_option("client.toolbarMode", previous_toolbar)
 
 
 def test_cloud_dependency_pins_match_local_runtime():

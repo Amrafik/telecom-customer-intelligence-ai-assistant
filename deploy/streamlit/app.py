@@ -15,6 +15,7 @@ from telecom.cloud_runtime import CloudLimits, get_runtime
 from telecom.monitoring import event
 
 st.set_page_config(page_title="Telecom Customer Intelligence", page_icon="◉", layout="centered")
+st.set_option("client.toolbarMode", "viewer")
 
 
 @st.cache_resource
@@ -37,12 +38,22 @@ except Exception as exc:
 
 st.title("Telecom Customer Intelligence")
 st.caption("Customer insights, churn prediction and telecom support.")
+st.info(
+    "**Offline demo** · This hosted demo uses deterministic routing and makes no Gemini API calls. "
+    "Requests execute the real SQLite customer lookup, Scikit-learn churn model, FAISS retrieval "
+    "and LangGraph workflow as needed."
+)
+st.caption(
+    "The full local version supports Gemini-powered agent routing, tool calling and grounded response "
+    "generation, verified in recorded live tests. "
+    "[GitHub · implementation and evaluation evidence]"
+    "(https://github.com/Amrafik/telecom-customer-intelligence-ai-assistant)"
+)
 with st.sidebar:
     st.subheader("Customer workspace")
     selected = st.selectbox("Customer", [None] + [f"CUST-{n:03d}" for n in range(1, 7)],
                             format_func=lambda item: item or "Select a customer (optional)")
     st.write("Mode: Offline")
-    st.info("Local customer data, churn predictions and retrieved FAQ excerpts. Gemini is disabled.")
     if st.button("Clear chat"):
         st.session_state.messages = []
         st.rerun()

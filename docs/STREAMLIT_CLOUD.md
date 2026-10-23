@@ -2,7 +2,7 @@
 
 This deployment path runs the existing customer lookup, churn pipeline, FAISS retrieval and LangGraph in **offline mode only**. It does not demonstrate live Gemini decisions. The ordinary local application still supports its existing offline and live modes.
 
-The deployment configuration is provided in the repository. No app has been deployed and Gemini access remains disabled for this entry point.
+The cloud entry point remains offline-only. An owner-supplied screenshot shows the hosted app running; private sharing and platform capacity still require owner verification.
 
 ## Architecture
 
@@ -122,3 +122,11 @@ The new twenty cloud-specific tests also have a separate Linux run report in `re
 ## Final publication checks
 
 The final regression initially exposed a logging test that read malformed historical development-log content. Test and evaluation processes had also shared that single-process log path. Pytest now writes to a temporary log directory for each test, and the logging assertion parses that actual test log strictly. Runtime logging is unchanged. Publication checks run sequentially; the final rerun and exact staged credential/size scan are recorded in `reports/cloud_preparation.json`.
+
+## Recruiter notice and Streamlit controls
+
+The cloud UI displays a short notice beneath the title: routing is deterministic, Gemini is not called, and applicable requests execute the actual SQLite lookup, Scikit-learn model, FAISS retrieval and LangGraph workflow. A second short line distinguishes the Gemini-powered local version and links to the repository's implementation and recorded live evaluation evidence. The sidebar retains its Offline label without repeating the notice.
+
+Only the cloud entry point sets `client.toolbarMode="viewer"`, using Streamlit's supported setting to hide developer options and its native Deploy control. The setting does not change access permissions. Community Cloud may supply additional owner controls externally, and their exact appearance has not been checked after this update. Refresh or rerun after the update, and use an invited viewer account to assess the recruiter view. See [Streamlit app chrome](https://docs.streamlit.io/develop/concepts/architecture/app-chrome).
+
+The focused cloud and local UI regression run passed **21 tests** with four upstream warnings. `reports/cloud_notice_pytest.xml` contains the results and `reports/cloud_notice_verification.json` records scope and limitations. No new Gemini calls were needed; the live-test statement refers to preserved earlier reports, not this UI check.

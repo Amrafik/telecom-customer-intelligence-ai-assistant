@@ -310,11 +310,11 @@ For a demonstration, start with roaming retrieval, then customer lookup, then th
 
 Cloud preparation passed **20/20 cloud tests on Linux**, a **10/10 real Linux cold-start smoke**, and dependency checks. Peak measured Linux RSS was **681.5 MiB**, so actual hosted capacity is still a trial gate. [Verification and limitations](reports/cloud_preparation.json).
 
-A separate **offline private-cloud trial** is provided in `deploy/streamlit/app.py`. It starts an internal FastAPI backend, verifies the packaged trained model, initializes cloud SQLite/FAISS resources and enforces shared request limits. It ignores local `.env` credentials and cannot enable Gemini. See [exact deployment steps](docs/STREAMLIT_CLOUD.md). The app has not been deployed; hosted privacy and resource capacity still need verification.
+A separate **offline private-cloud trial** is provided in `deploy/streamlit/app.py`. It starts an internal FastAPI backend, verifies the packaged trained model, initializes cloud SQLite/FAISS resources and enforces shared request limits. It ignores local `.env` credentials and cannot enable Gemini. See [exact deployment steps](docs/STREAMLIT_CLOUD.md). The owner has supplied a screenshot of the hosted app; private sharing and resource capacity still need owner verification.
 
-A short local recording is the recommended recruiter demo. The current API has no authentication or shared usage cap, and hosting only the Streamlit entry point would not start FastAPI. Keeping the Gemini key server-side protects the credential but does not stop visitors from repeatedly invoking the service.
+A short recording of the local Gemini version complements the offline hosted demo. The original local API has no viewer authentication or shared usage cap; the cloud wrapper adds its own offline-only controls. A hidden Gemini key alone would not prevent visitors from consuming quota through an unrestricted live endpoint.
 
-An offline public demo could avoid Gemini calls, but hosting both services and validating free-host resources would still require work. No deployment was performed. See the sourced [demo assessment and recording outline](docs/DEMO_OPTIONS.md) for the options and limits.
+The offline hosted UI explains its deterministic behavior and links to the full implementation and recorded live evidence. Hosting observations do not establish broad reliability or model generalisation. See the sourced [demo assessment and recording outline](docs/DEMO_OPTIONS.md) for the live-demo options and limits.
 
 ## License and attribution
 
