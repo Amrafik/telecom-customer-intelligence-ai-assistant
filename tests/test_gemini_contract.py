@@ -89,6 +89,44 @@ def test_gemini_auto_can_stop_after_profile_lookup():
         llm.client.close()
 
 
+@pytest.mark.parametrize("question,selected", [
+    ("Show the profile for CUST-002.", None),
+    ("Show the usage details for cust-002.", None),
+    ("Show this customer's profile.", "CUST-002"),
+])
+def test_profile_graph_uses_resolved_id_and_only_customer_lookup(question, selected):
+    requests = []
+
+    def provider_fixture(request):
+        body = json.loads(request.content)
+        requests.append(body)
+        schema = body["generationConfig"].get("responseJsonSchema", {}).get("title")
+        if schema == "RouteDecision":
+            task = json.loads(body["contents"][0]["parts"][0]["text"])
+            assert task == {"message": question, "selected_customer_id": "CUST-002"}
+            response = structured({"route": "customer"})
+        elif len(body["contents"]) == 1:
+            task = json.loads(body["contents"][0]["parts"][0]["text"])
+            assert task["customer_id"] == "CUST-002"
+            response = payload([{"functionCall": {"name": "get_customer", "args": {"customer_id": "CUST-002"}}}])
+        else:
+            record = body["contents"][2]["parts"][0]["functionResponse"]["response"]["data"]
+            assert record["customer_id"] == "CUST-002" and record["calls"] == 220
+            response = payload([{"text": "Profile obtained."}])
+        return httpx.Response(200, json=response)
+
+    llm = adapter(provider_fixture)
+    try:
+        result = Assistant(llm.settings, llm=llm).chat(ChatRequest(message=question, customer_id=selected))
+        assert result.route == "customer" and not result.errors
+        assert [(trace.tool, trace.status) for trace in result.tool_trace] == [("get_customer", "success")]
+        assert [source.source_id for source in result.sources] == ["customer:CUST-002"]
+        assert json.loads(result.sources[0].excerpt)["calls"] == 220
+        assert "Demo Customer B" in result.answer and len(requests) == 3
+    finally:
+        llm.client.close()
+
+
 @pytest.mark.parametrize("parts", [
     [{"text": "No call"}],
     [{"functionCall": {"name": "get_customer", "args": {}}}, {"functionCall": {"name": "predict_churn", "args": {}}}]

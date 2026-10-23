@@ -336,7 +336,7 @@ START → router
 
 **`resolve_customer()`** extracts an explicitly written ID or uses the selected customer. It asks for clarification on malformed/multiple/conflicting IDs. The LLM cannot invent an ID to access another record.
 
-**`_route()`** uses `offline_route()` only in offline mode and the selected adapter's shared `route()` in live mode. The live route is validated as one of four labels. Customer routes without an ID become clarification before tools run. `Assistant.llm()` constructs only the selected provider, lazily; offline mode never constructs either client.
+**`_route()`** uses `offline_route()` only in offline mode and Gemini's shared `route()` in live mode. The live route is validated as one of four labels. Its instructions explicitly distinguish customer profiles and usage from general policy questions, with examples such as `Show the profile for CUST-002.`. The router identifies intent; it does not decide whether a record exists or a requested policy fact is available. The workflow validates IDs, SQL checks record existence and RAG checks evidence. Customer routes without an ID become clarification before tools run. `Assistant.llm()` constructs the Gemini client lazily; offline mode never constructs it.
 
 **`_run_tools()`** runs the existing bounded loop. In live mode it calls `choose_tool()`, executes through the same registry and appends the real `function_call_output`. The internal result record is translated by the Gemini adapter to a native `FunctionResponse`. The graph does not need provider-specific branches in its nodes or tool loop. It stops on failure, sufficient results or its step limit.
 
@@ -474,6 +474,8 @@ The executed command was:
 ```
 
 The post-cleanup result is **88 passed in 32.15 seconds**, with four upstream deprecation warnings and no failed tests. Obsolete provider-only tests were removed; new audit tests check full tuning reproduction, baseline metrics, corrupted artifacts, SQLite closure and saved data consistency.
+
+A later interactive regression expanded the suite to **91 passing tests**. Three SDK-contract cases check profile-only lookup with an explicit ID, a lowercase ID and a selected customer; mocked responses test wiring and actual SQL execution, not live classification quality. Separate real Gemini checks passed **10/10**, with another **2/2** checks against the restarted HTTP server. Their questions, actual tool outputs, SQL/model comparisons and limitations are saved in `reports/live_prompt_regression.json`. These small checks do not guarantee that the model will classify every future question correctly.
 
 | File | Important behavior checked |
 |---|---|

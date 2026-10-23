@@ -93,3 +93,13 @@ Accurate CV bullets:
 - Built a Gemini-powered telecom assistant using two specialised LangGraph agents, FAISS RAG, parameterized SQLite JOINs and FastAPI/Streamlit; verified real mixed-agent tool execution and source-grounded responses.
 - Tuned a Random Forest with grouped cross-validation and fold-local preprocessing on public UCI telecom data, achieving held-out F1 **0.856** and ROC-AUC **0.979** on **635** test records.
 - Implemented validated REST endpoints, bounded read-only tools and structured request monitoring; passed **88 automated tests** and **22 offline evaluation cases**, with separate opt-in live verification.
+
+
+## Interactive regression follow-up — 23 October 2026
+
+Interactive use exposed a false clarification for `Show the profile for CUST-002.`. The record existed, and an unchanged live retry returned its SQL profile, indicating an intermittent model-routing error rather than a missing customer. The routing instructions now explicitly cover profile/details/usage lookups, distinguish intent from record or policy availability, and give labelled examples. Live routing and tool selection remain Gemini decisions; no deterministic live fallback was introduced.
+
+- Complete current suite: **91 passed**, four upstream warnings, **36.89 seconds**; `reports/pytest.xml` now reflects this later run. The earlier 88-test audit timing is preserved in `reports/final_regression_summary.json`.
+- Fresh live prompt checks: **10/10**, including the standard seven scenarios, a lowercase-ID usage request, selected-customer context and a repeated exact profile question. Actual registry outputs were compared with source evidence.
+- Restarted localhost API: **2/2** additional live checks. The exact profile question executed `get_customer` and returned the joined SQL record. The Japan-price question executed `search_faqs` and returned uncertainty without unsupported citations. Request-correlated logs confirmed execution.
+- Detailed evidence: `reports/live_prompt_regression.json`. Earlier live reports and the ML benchmark are preserved. These limited samples do not prove general routing reliability or exhaustive semantic grounding.

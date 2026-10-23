@@ -206,8 +206,9 @@ Recorded checks on **23 October 2026**:
 
 | Check | Result | Scope and evidence |
 |---|---:|---|
-| Automated tests | **88 passed** | API, SQL JOIN, ML training/inference, retrieval, graph routing, tool validation, Gemini SDK contracts and Streamlit integration. [JUnit report](reports/pytest.xml). |
+| Automated tests | **91 passed** | API, SQL JOIN, ML training/inference, retrieval, graph routing, tool validation, Gemini SDK contracts and Streamlit integration. [JUnit report](reports/pytest.xml). |
 | Offline evaluation | **22 / 22** | Actual local tools and deterministic orchestration; no live LLM decisions. [Evaluation report](reports/evaluation.json). |
+| Interactive live prompt regression | **10 / 10 + 2 / 2 HTTP checks** | Core scenarios, profile wording variations and repeated lookup; the restarted API also checked the exact profile and Japan-price questions. [Prompt regression report](reports/live_prompt_regression.json). |
 | Limited live Gemini audit | **2 / 2** | Mixed-agent request and unsupported-price uncertainty, with executed tools and sources checked. [Live audit](reports/gemini_live_audit.json). |
 | Local runtime smoke checks | **8 / 8** | Running API/UI readiness, prediction, validation and error handling. [Runtime report](reports/final_runtime_smoke.json). |
 | Earlier full live Gemini suite | **7 / 7** | FAQ, lookup, prediction, mixed request and failure cases. This run predates the final cleanup. [Historical live report](reports/gemini_live_evaluation.json). |
