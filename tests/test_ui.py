@@ -30,6 +30,18 @@ def test_streamlit_chat_uses_real_fastapi(assistant, monkeypatch):
         assert len(messages) == 2 and messages[-1]["result"]["route"] == "customer"
         assert "Estimated churn probability:" in messages[-1]["result"]["answer"]
         assert messages[-1]["result"]["sources"]
+        ui.chat_input[0].set_value("How do I activate international roaming?").run()
+        assert not ui.exception
+        messages = ui.session_state["messages"]
+        assert len(messages) == 4 and messages[-1]["result"]["route"] == "knowledge"
+        assert len(ui.chat_message) == 4
+        assert not ui.get("doc_string"), "Replaying chat history displayed an internal Streamlit object."
+        ui.run()
+        assert not ui.exception and len(ui.chat_message) == 4
+        assert not ui.get("doc_string")
+        ui.button[0].click().run()
+        assert not ui.exception
+        assert ui.session_state["messages"] == [] and not ui.chat_message
     finally:
         server.should_exit = True
         thread.join(timeout=10)

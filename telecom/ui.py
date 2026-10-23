@@ -6,7 +6,7 @@ from telecom.config import Settings
 settings = Settings()
 st.set_page_config(page_title="Telecom Customer Intelligence", page_icon="◉", layout="centered")
 st.title("Telecom Customer Intelligence")
-st.caption("AI Assistant · Independent portfolio project · Fictional DemoTel customers and policies")
+st.caption("Customer insights, churn prediction and telecom support.")
 
 
 @st.cache_data(ttl=30)
@@ -65,7 +65,10 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-        show_result(message["result"]) if "result" in message else st.markdown(message["content"])
+        if "result" in message:
+            show_result(message["result"])
+        else:
+            st.markdown(message["content"])
 
 if prompt := st.chat_input("Ask about telecom policies or a fictional customer's churn"):
     st.session_state.messages.append({"role": "user", "content": prompt})
