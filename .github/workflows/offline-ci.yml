@@ -1,0 +1,88 @@
+name: Offline CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: offline-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline:
+    name: Python 3.12 / Linux offline regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      APP_MODE: offline
+      GEMINI_API_KEY: ""
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      TOKENIZERS_PARALLELISM: "false"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-lock.txt
+            pyproject.toml
+
+      - name: Install CPU dependencies and project
+        run: |
+          python -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -r requirements-lock.txt
+          python -m pip install -e . --no-deps
+          python -m pip check
+
+      # Rebuild resources on every run; only downloaded pip packages are cached.
+      - name: Build local resources
+        id: resources
+        run: |
+          # Do not upload historical reports as evidence of this run.
+          rm -f reports/evaluation.json reports/benchmark.json reports/grid_search.csv reports/split.json
+          python -m telecom.prepare_data
+          python -m telecom.init_db
+          python -m telecom.train
+          python -m telecom.build_index
+          # Training rewrites benchmark.json; refresh its cloud-model fingerprint.
+          python scripts/package_cloud_model.py
+
+      - name: Run full regression suite
+        id: regression
+        env:
+          HF_HUB_OFFLINE: "1"
+          TRANSFORMERS_OFFLINE: "1"
+        run: python -m pytest -q --junitxml=reports/ci-pytest.xml
+
+      - name: Run offline evaluation
+        if: ${{ !cancelled() && steps.resources.outcome == 'success' }}
+        env:
+          HF_HUB_OFFLINE: "1"
+          TRANSFORMERS_OFFLINE: "1"
+        run: python -m telecom.evaluate
+
+      - name: Collect fresh evaluation report
+        if: ${{ !cancelled() && steps.resources.outcome == 'success' }}
+        run: cp reports/evaluation.json reports/ci-evaluation.json
+
+      - name: Upload CI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: offline-ci-evidence
+          path: |
+            reports/ci-pytest.xml
+            reports/ci-evaluation.json
+          retention-days: 14
+
