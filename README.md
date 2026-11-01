@@ -1,5 +1,7 @@
 # Telecom Customer Intelligence AI Assistant
 
+[![Offline CI](https://github.com/Amrafik/telecom-customer-intelligence-ai-assistant/actions/workflows/offline-ci.yml/badge.svg)](https://github.com/Amrafik/telecom-customer-intelligence-ai-assistant/actions/workflows/offline-ci.yml)
+
 **[Try the Hosted Demo (Offline Mode)](https://amrafik-telecom-ai.streamlit.app/)**
 
 **Telecom policy answers, customer lookup and churn prediction in one conversation.**
@@ -162,7 +164,7 @@ python -m venv .venv
 if (-not (Test-Path -LiteralPath .env)) { Copy-Item -LiteralPath .env.example -Destination .env }
 ```
 
-In VS Code, install the Python extension and select `.venv\Scripts\python.exe` with **Python: Select Interpreter**. These commands use the interpreter directly, so activation is optional. Initial installation requires network access and several hundred MB for dependencies and embedding weights. A fresh installation on a separate machine has not yet been verified.
+In VS Code, install the Python extension and select `.venv\Scripts\python.exe` with **Python: Select Interpreter**. These commands use the interpreter directly, so activation is optional. Initial installation requires network access and several hundred MB for dependencies and embedding weights. Clean Ubuntu/Python 3.12 installation and offline functionality are now verified by [GitHub Actions](#automated-linux-checks); fresh Windows/macOS installations and Python 3.11 remain unverified.
 
 ### 2. Build local resources
 
@@ -241,6 +243,16 @@ Build the local resources before running the suite:
 .\.venv\Scripts\python.exe -m pytest -q --junitxml=reports/pytest.xml
 .\.venv\Scripts\python.exe -m telecom.evaluate
 ```
+
+### Automated Linux checks
+
+[Offline CI](.github/workflows/offline-ci.yml) runs on pushes, pull requests and manual dispatches using Ubuntu 24.04 and Python 3.12. It installs CPU PyTorch, the locked dependencies and the editable project, checks dependency compatibility, then rebuilds the public-data model, fictional SQLite database and pinned FAQ embeddings/index. The existing packaging script refreshes the cloud model and benchmark fingerprint after training. Only pip downloads are cached; application resources are rebuilt each run.
+
+The [first clean-run verification on 1 November 2026](https://github.com/Amrafik/telecom-customer-intelligence-ai-assistant/actions/runs/41309736937) passed **181 tests** and **38/38 offline evaluation cases**, reporting **zero provider calls**. The full regression suite includes simulated Gemini SDK contracts; it blocks external sockets. Evaluation uses explicit offline mode with no credentials, and both checks disable Hugging Face network access after resource construction. JUnit and fresh evaluation reports are uploaded as `offline-ci-evidence` artifacts, retained for 14 days. Seven upstream deprecation warnings remain.
+
+This verifies the selected Linux/Python 3.12 setup, not Python 3.11, fresh Windows/macOS installation, live Gemini behavior or production hosting reliability. Initial setup still depends on package and pinned embedding downloads.
+
+### Recorded local checks
 
 Recorded checks on **23 October 2026**:
 
